@@ -1,12 +1,25 @@
 import numpy as np
 import pandas as pd
 
-from constants import DATA_PATHS
+from utils.load_data import df
 
-df = pd.read_csv(DATA_PATHS.RATING_DATASET, sep=',')
-df_id = pd.read_csv(DATA_PATHS.MOVIE_DATASET, sep=',')
-df = pd.merge(df, df_id, on=['movieId'])
-rating_matrix = np.zeros((df.userId.unique().shape[0], max(df.movieId)))
-for row in df.itertuples():
-    rating_matrix[row[1]-1, row[2]-1] = row[3]
-    rating_matrix = rating_matrix[:,:9000]
+
+if __name__ == '__main__':
+    # Create a matrix of ratings with users as rows and movies as columns
+
+    # Find the maximum user id and movie id
+    max_user_id = df['userId'].max()
+    max_movie_id = df['movieId'].max()
+
+    # Create a zero matrix of size max_user_id x max_movie_id
+    rating_matrix = np.zeros((max_user_id, max_movie_id))
+
+    # Iterate over each row of df
+    for index, row in df.iterrows():
+        user_index = row['userId'] - 1
+        movie_index = row['movieId'] - 1
+        rating = row['rating']
+
+        # Update the value at the corresponding position in rating_matrix
+        # to rating
+        rating_matrix[user_index, movie_index] = rating
