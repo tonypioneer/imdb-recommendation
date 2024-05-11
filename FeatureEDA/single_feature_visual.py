@@ -179,7 +179,8 @@ test.loc[test['id'] == 6473, 'budget'] = 100
 test.loc[test['id'] == 6842, 'budget'] = 30
 
 # external data
-release_dates = pd.read_csv('../data/prediction/release_dates_per_country.csv')
+release_dates = pd.read_csv(
+    '../data/prediction/release_dates_per_country.csv')
 release_dates['id'] = range(1, 7399)
 release_dates.drop(['original_title', 'title'], axis=1, inplace=True)
 # release_dates.index = release_dates['id']
@@ -188,9 +189,11 @@ print(train.head())
 train = pd.merge(train, release_dates, how='left', on=['id'])
 test = pd.merge(test, release_dates, how='left', on=['id'])
 
-trainAdditionalFeatures = pd.read_csv('../data/prediction/TrainAdditionalFeatures.csv')[
+trainAdditionalFeatures = pd.read_csv(
+    '../data/prediction/TrainAdditionalFeatures.csv')[
     ['imdb_id', 'popularity2', 'rating']]
-testAdditionalFeatures = pd.read_csv('../data/prediction/TestAdditionalFeatures.csv')[
+testAdditionalFeatures = pd.read_csv(
+    '../data/prediction/TestAdditionalFeatures.csv')[
     ['imdb_id', 'popularity2', 'rating']]
 
 train = pd.merge(train, trainAdditionalFeatures, how='left', on=['imdb_id'])

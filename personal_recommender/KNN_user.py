@@ -15,8 +15,8 @@ class Personal_KNN_recommender:
     def __init__(self, mode=0):
         self.index = pd.read_csv('../data/personal/movies.csv')
         self.reader = Reader()
-        self.ratings = pd.read_csv('../data/personal/train.csv')
-        self.testings = pd.read_csv('../data/personal/test.csv')
+        self.ratings = pd.read_csv('../../data/personal/train.csv')
+        self.testings = pd.read_csv('../../data/personal/test.csv')
         data = Dataset.load_from_df(self.ratings[['userId', 'movieId', 'rating']], self.reader)
         trainset = data.build_full_trainset()
         sim_options = {'name': 'pearson_baseline', 'user_based': True}
@@ -77,7 +77,7 @@ class Personal_KNN_recommender:
             # print(ids)
             result.append(ids)
 
-        with open("./result.csv", "w") as csvfile:
+        with open("result.csv", "w") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['userId', 'result'])
             for i,row in enumerate(result):

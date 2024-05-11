@@ -11,7 +11,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 import sys
 import os
-sys.path.insert(0, '..')
+sys.path.insert(0, '../docs')
 from personal_recommender.KNN_movie import Movie_KNN_recommender
 from personal_recommender.KNN_user import Personal_KNN_recommender
 from personal_recommender.Personal_SVD import Personal_SVD_recommender

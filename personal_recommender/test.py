@@ -40,7 +40,7 @@ for user in usrid:
 
 threshold = 0.85
 test_data = []
-with open("./train.csv", "w") as csvfile:
+with open("train.csv", "w") as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(['userId', 'movieId','rating'])
     for this_user in data_all:
@@ -54,7 +54,7 @@ with open("./train.csv", "w") as csvfile:
 
 
 
-with open("./test.csv", "w") as csvfile:
+with open("test.csv", "w") as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(['userId', 'movieId', 'rating'])
     for row in test_data:
