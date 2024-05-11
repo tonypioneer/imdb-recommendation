@@ -3,7 +3,7 @@
 import pandas as pd
 import numpy as np
 import os
-from surprise import Reader, Dataset, SVD, evaluate
+from surprise import Reader, Dataset, SVD
 from surprise import KNNBaseline
 from surprise import KNNWithMeans
 from surprise import KNNBasic

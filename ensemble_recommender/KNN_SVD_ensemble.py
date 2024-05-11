@@ -16,7 +16,7 @@ class KNN_SVD_ensemble:
     def __init__(self):
         self.user = Personal_KNN_recommender()
         self.movie = Personal_SVD_recommender()
-        self.testings = pd.read_csv('../../data/personal/test.csv')
+        self.testings = pd.read_csv('../data/personal/test.csv')
         self.userid = []
         for i in range(len(self.testings['userId'])):
             if not self.testings['userId'][i] in self.userid:

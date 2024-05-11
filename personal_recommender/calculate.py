@@ -1,7 +1,7 @@
 import csv
 import pandas as pd
 
-test = pd.read_csv('../../data/personal/test.csv')
+test = pd.read_csv('../data/personal/test.csv')
 usrid = []
 movieid = []
 for i in range(len(test['userId'])):

@@ -4,16 +4,17 @@
 import pandas as pd
 import numpy as np
 import os
-from surprise import Reader, Dataset, SVD, evaluate
+from surprise import Reader, Dataset, SVD
+from surprise.model_selection import cross_validate
 
 class Personal_SVD_recommender:
     def __init__(self):
         self.reader = Reader()
-        self.ratings = pd.read_csv('../../data/personal/train.csv')
+        self.ratings = pd.read_csv('../personal_recommender/train.csv')
         data = Dataset.load_from_df(self.ratings[['userId', 'movieId', 'rating']], self.reader)
         # data.split(n_folds=5)
         self.svd = SVD(n_epochs=20, n_factors=100, verbose=True)
-        evaluate(self.svd, data, measures=['RMSE', 'MAE'])
+        results = cross_validate(self.svd, data, measures=['RMSE', 'MAE'], cv=5, verbose=True)
         trainset = data.build_full_trainset()
         self.svd.fit(trainset)
 
@@ -45,5 +46,5 @@ class Personal_SVD_recommender:
         return movie, ids
 
 
-# test = Personal_SVD_recommender()
-# print(test.recommend(2, [1,2,3,4,5,6,7,8,9,10,11,12,13,14]))
+test = Personal_SVD_recommender()
+print(test.recommend(2, [1,2,3,4,5,6,7,8,9,10,11,12,13,14]))

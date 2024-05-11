@@ -4,7 +4,7 @@
 import pandas as pd
 import numpy as np
 import os
-from surprise import Reader, Dataset, SVD, evaluate
+from surprise import Reader, Dataset, SVD
 from surprise import KNNBaseline
 from surprise import KNNWithMeans
 from surprise import KNNBasic
@@ -15,8 +15,8 @@ class Personal_KNN_recommender:
     def __init__(self, mode=0):
         self.index = pd.read_csv('../data/personal/movies.csv')
         self.reader = Reader()
-        self.ratings = pd.read_csv('../../data/personal/train.csv')
-        self.testings = pd.read_csv('../../data/personal/test.csv')
+        self.ratings = pd.read_csv('../data/personal/train.csv')
+        self.testings = pd.read_csv('../data/personal/test.csv')
         data = Dataset.load_from_df(self.ratings[['userId', 'movieId', 'rating']], self.reader)
         trainset = data.build_full_trainset()
         sim_options = {'name': 'pearson_baseline', 'user_based': True}
