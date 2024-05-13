@@ -37,5 +37,5 @@ class Content_recommender:
 
 
 test = Content_recommender()
-print(test.recommnd('The Dark Knight Rises'))
+print(test.recommend('The Dark Knight Rises'))
 

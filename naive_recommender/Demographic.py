@@ -29,9 +29,5 @@ class Demographic_recommender:
         print('Using the Demographic recommending method, followings are the top %d score movies' % n)
         print(self.movies[['title', 'vote_count', 'vote_average', 'score']].head(n))
 
-
-
-
-
-# test = Demographic_recommender()
-# test.score(10)
+test = Demographic_recommender()
+test.recommend(10)
