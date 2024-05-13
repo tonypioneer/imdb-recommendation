@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 
 from utils.load_data import df
+from recommender.users import Personal_KNN_recommender
+from utils.dataset import make_training_set
 
 
 if __name__ == '__main__':
@@ -23,3 +25,12 @@ if __name__ == '__main__':
         # Update the value at the corresponding position in rating_matrix
         # to rating
         rating_matrix[user_index, movie_index] = rating
+
+    # test = Personal_KNN_recommender()
+    # result = test.recommend(6, 10)
+    # for i in result:
+    #     print(i)
+    #
+    # test.test(10)
+
+    make_training_set()
