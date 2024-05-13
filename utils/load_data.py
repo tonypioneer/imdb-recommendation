@@ -1,6 +1,7 @@
 import pandas as pd
 
 from constants import DATA_PATHS
+from utils.dataset import make_training_set
 
 
 def load_data():
@@ -28,7 +29,10 @@ def load_data():
     # Merge the dataframes on the movieId column
     df = pd.merge(df_rating, df_movie, on=['movieId'])
 
-    return df, df_movie, df_rating
+    # Generate training set and test set
+    df_train, df_test = make_training_set(df_rating)
+
+    return df, df_movie, df_rating, df_train, df_test
 
 
-df, df_movie, df_rating = load_data()
+df, df_movie, df_rating, df_train, df_test = load_data()

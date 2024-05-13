@@ -2,12 +2,14 @@ import pandas as pd
 import numpy as np
 import random
 
-from utils.load_data import df_rating
 from constants import DIVISION_THRESHOLD, DATA_PATHS
 
 
-def make_training_set():
+def make_training_set(df_rating: pd.DataFrame):
     """Generate training set and test set for the user recommender.
+
+    :param:
+        df_rating (pd.DataFrame): The dataframe of ratings.
 
     :return:
         df_train (pd.DataFrame): Training set.
