@@ -59,7 +59,7 @@ from surprise.model_selection import cross_validate
 class Personal_SVD_recommender:
     def __init__(self):
         self.reader = Reader()
-        self.ratings = pd.read_csv('../references/train.csv')
+        self.ratings = pd.read_csv('data/output/train.csv')
         data = Dataset.load_from_df(self.ratings[['userId', 'movieId', 'rating']], self.reader)
         # data.split(n_folds=5)
         self.svd = SVD(n_epochs=20, n_factors=100, verbose=True)
@@ -67,7 +67,7 @@ class Personal_SVD_recommender:
         trainset = data.build_full_trainset()
         self.svd.fit(trainset)
 
-        self.index = pd.read_csv('../data/personal/movies.csv')
+        self.index = pd.read_csv('data/input/movies.csv')
 
     def rating(self, usrID, movieID):
         rate = self.svd.predict(usrID, movieID)

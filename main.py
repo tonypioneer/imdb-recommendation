@@ -7,7 +7,7 @@ import sys
 import os
 import csv
 
-sys.path.insert(0, '../docs')
+sys.path.insert(0, 'docs')
 from recommender.movies import Movie_KNN_recommender
 from recommender.users import Personal_KNN_recommender
 from recommender.movies import Personal_SVD_recommender
@@ -20,7 +20,7 @@ class KNN_SVD_ensemble:
     def __init__(self):
         self.user = Personal_KNN_recommender()
         self.movie = Personal_SVD_recommender()
-        self.testings = pd.read_csv('../data/personal/test.csv')
+        self.testings = pd.read_csv('data/output/test.csv')
         self.userid = []
         for i in range(len(self.testings['userId'])):
             if not self.testings['userId'][i] in self.userid:
@@ -41,7 +41,7 @@ class KNN_SVD_ensemble:
             print(ids)
             result.append(ids)
 
-        with open("result.csv", "w") as csvfile:
+        with open("data/output/result.csv", "w") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['userId', 'result'])
             for i, row in enumerate(result):

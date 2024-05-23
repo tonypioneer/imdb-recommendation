@@ -1,7 +1,7 @@
 import csv
 import pandas as pd
 
-test = pd.read_csv('../data/personal/test.csv')
+test = pd.read_csv('data/output/test.csv')
 usrid = []
 movieid = []
 for i in range(len(test['userId'])):
@@ -26,7 +26,7 @@ for user in usrid:
 
 print('data all', len(data_all))
 
-result = pd.read_csv('../ensemble_recommender/result.csv')
+result = pd.read_csv('data/output/result.csv')
 print('pred', len(result['userId']))
 posi = 0
 neg = 0
