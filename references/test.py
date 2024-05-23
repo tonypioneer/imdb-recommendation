@@ -8,7 +8,7 @@ from surprise import KNNBasic
 import csv
 import random
 
-ratings = pd.read_csv('data/personal/ratings.csv')
+ratings = pd.read_csv('../data/input/ratings.csv')
 usrid = []
 movieid = []
 for i in range(len(ratings['userId'])):
@@ -40,7 +40,7 @@ for user in usrid:
 
 threshold = 0.85
 test_data = []
-with open("train.csv", "w") as csvfile:
+with open("../data/output/train.csv", "w") as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(['userId', 'movieId','rating'])
     for this_user in data_all:

@@ -8,7 +8,6 @@ import os
 import csv
 
 sys.path.insert(0, 'docs')
-from recommender.movies import Movie_KNN_recommender
 from recommender.users import Personal_KNN_recommender
 from recommender.movies import Personal_SVD_recommender
 
@@ -26,8 +25,9 @@ class KNN_SVD_ensemble:
             if not self.testings['userId'][i] in self.userid:
                 self.userid.append(self.testings['userId'][i])
 
+
     def recommend(self, usrID):
-        first_ids = self.user.recommend(usrID, 50)
+        _, first_ids = self.user.recommend(usrID, 50)
         # print(first_ids)
         second_ids, movie_id = self.movie.recommend(usrID, first_ids, 10)
         # print(second_ids)
@@ -41,7 +41,7 @@ class KNN_SVD_ensemble:
             print(ids)
             result.append(ids)
 
-        with open("data/output/result.csv", "w") as csvfile:
+        with open("result.csv", "w") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['userId', 'result'])
             for i, row in enumerate(result):
