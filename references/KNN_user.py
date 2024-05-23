@@ -15,7 +15,7 @@ class Personal_KNN_recommender:
     def __init__(self, mode=0):
         self.index = pd.read_csv('data/input/movies.csv')
         self.reader = Reader()
-        self.ratings = pd.read_csv('data/output/train.csv')
+        self.ratings = pd.read_csv('data/output/training.csv')
         self.testings = pd.read_csv('data/output/test.csv')
         data = Dataset.load_from_df(self.ratings[['userId', 'movieId', 'rating']], self.reader)
         trainset = data.build_full_trainset()

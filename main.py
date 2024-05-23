@@ -27,7 +27,7 @@ class KNN_SVD_ensemble:
                 self.userid.append(self.testings['userId'][i])
 
     def recommend(self, usrID):
-        _, first_ids = self.user.recommend(usrID, 50)
+        first_ids = self.user.recommend(usrID, 50)
         # print(first_ids)
         second_ids, movie_id = self.movie.recommend(usrID, first_ids, 10)
         # print(second_ids)
