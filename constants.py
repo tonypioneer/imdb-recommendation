@@ -3,7 +3,7 @@
 class DATA_PATHS:
     MOVIE_DATASET = 'data/input/movies.csv'
     RATING_DATASET = 'data/input/ratings.csv'
-    TRAINING_DATASET = 'data/output/training.csv'
+    TRAINING_DATASET = 'data/output/train.csv'
     TEST_DATASET = 'data/output/test.csv'
 
 

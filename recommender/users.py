@@ -57,7 +57,7 @@ class Personal_KNN_recommender:
     def test(self, num=10):
         results = [(user, self.recommend(user, num)[1]) for user in self.userid]
 
-        with open("result.csv", "w", newline='') as csvfile:
+        with open("data/output/result.csv", "w", newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['userId', 'result'])
             for user, movie_ids in results:
