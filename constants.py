@@ -5,6 +5,7 @@ class DATA_PATHS:
     RATING_DATASET = 'data/input/ratings.csv'
     TRAINING_DATASET = 'data/output/train.csv'
     TEST_DATASET = 'data/output/test.csv'
+    RESULT_DATASET = 'data/output/result.csv'
 
 
 # Threshold for dividing the data into training and test sets

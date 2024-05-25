@@ -1,10 +1,12 @@
 import numpy as np
 import pandas as pd
-import csv
 
 from utils.load_data import df, df_movie, df_rating, df_train, df_test
 from recommender.users import user_knn
 from recommender.movies import movie_svd
+from constants import DATA_PATHS
+
+import recommender.calculate
 
 
 # Use KNN to match the similarity of the input user, and then select the 10
@@ -15,33 +17,29 @@ class movie_recommender:
     def __init__(self):
         self.user = user_knn()
         self.movie = movie_svd()
-        self.testings = pd.read_csv('data/output/test.csv')
-        self.userid = []
-        for i in range(len(self.testings['userId'])):
-            if not self.testings['userId'][i] in self.userid:
-                self.userid.append(self.testings['userId'][i])
+        self.userid = df_test['userId'].drop_duplicates().tolist()
 
-
-    def recommend(self, usrID):
-        _, first_ids = self.user.recommend(usrID, 50)
+    def recommend(self, userID, first_num=50, second_num=10):
+        _, first_ids = self.user.recommend(userID, first_num)
         # print(first_ids)
-        second_ids, movie_id = self.movie.recommend(usrID, first_ids, 10)
+        second_ids, movie_id = self.movie.recommend(
+            userID,
+            first_ids,
+            second_num
+        )
         # print(second_ids)
         return movie_id
 
-    def test(self, num):
-        result = []
+    def test(self):
+        results = []
         for user in self.userid:
-            print(user)
+            # print(user)
             ids = self.recommend(user)
-            print(ids)
-            result.append(ids)
+            # print(ids)
+            results.append({'userId': user, 'result': ids})
 
-        with open("result.csv", "w") as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(['userId', 'result'])
-            for i, row in enumerate(result):
-                writer.writerow([self.userid[i], row])
+        df_result = pd.DataFrame(results)
+        df_result.to_csv(DATA_PATHS.RESULT_DATASET, index=False)
 
 
 if __name__ == '__main__':
@@ -64,6 +62,6 @@ if __name__ == '__main__':
         # to rating
         rating_matrix[user_index, movie_index] = rating
 
-    test = movie_recommender()
-    # test.recommend(2)
-    test.test(10)
+    # test = movie_recommender()
+    # # test.recommend(2)
+    # test.test()

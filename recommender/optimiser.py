@@ -8,14 +8,28 @@ class SVD_SGD:
         self.n_epochs = n_epochs
 
     def fit(self, train_data):
-        self.user_factors = np.random.normal(0, 0.1, (train_data['userId'].max()+1, self.n_factors))
-        self.item_factors = np.random.normal(0, 0.1, (train_data['movieId'].max()+1, self.n_factors))
+        self.user_factors = np.random.normal(
+            0,
+            0.1,
+            (train_data['userId'].max()+1, self.n_factors)
+        )
+        self.item_factors = np.random.normal(
+            0,
+            0.1,
+            (train_data['movieId'].max()+1, self.n_factors)
+        )
         for epoch in range(self.n_epochs):
             for row in train_data.itertuples():
                 user, item, rating = row.userId, row.movieId, row.rating
                 error = rating - self.predict(user, item)
-                self.user_factors[user] += self.lr * (error * self.item_factors[item] - self.reg * self.user_factors[user])
-                self.item_factors[item] += self.lr * (error * self.user_factors[user] - self.reg * self.item_factors[item])
+                self.user_factors[user] += (
+                        self.lr * (error * self.item_factors[item] -
+                        self.reg * self.user_factors[user])
+                )
+                self.item_factors[item] += self.lr * (
+                        error * self.user_factors[user] -
+                        self.reg * self.item_factors[item]
+                )
 
     def predict(self, user, item):
         return np.dot(self.user_factors[user], self.item_factors[item])
@@ -30,15 +44,33 @@ class SVD_SGLD:
         self.noise_scale = noise_scale
 
     def fit(self, train_data):
-        self.user_factors = np.random.normal(0, 0.1, (train_data['userId'].max()+1, self.n_factors))
-        self.item_factors = np.random.normal(0, 0.1, (train_data['movieId'].max()+1, self.n_factors))
+        self.user_factors = np.random.normal(
+            0,
+            0.1,
+            (train_data['userId'].max()+1, self.n_factors)
+        )
+        self.item_factors = np.random.normal(
+            0,
+            0.1,
+            (train_data['movieId'].max()+1, self.n_factors)
+        )
         for epoch in range(self.n_epochs):
             for row in train_data.itertuples():
                 user, item, rating = row.userId, row.movieId, row.rating
                 error = rating - self.predict(user, item)
-                noise = np.random.normal(0, self.noise_scale, self.n_factors)
-                self.user_factors[user] += self.lr * (error * self.item_factors[item] - self.reg * self.user_factors[user]) + noise
-                self.item_factors[item] += self.lr * (error * self.user_factors[user] - self.reg * self.item_factors[item]) + noise
+                noise = np.random.normal(
+                    0,
+                    self.noise_scale,
+                    self.n_factors
+                )
+                self.user_factors[user] += self.lr * (
+                        error * self.item_factors[item] -
+                        self.reg * self.user_factors[user]
+                ) + noise
+                self.item_factors[item] += self.lr * (
+                        error * self.user_factors[user] -
+                        self.reg * self.item_factors[item]
+                ) + noise
 
     def predict(self, user, item):
         return np.dot(self.user_factors[user], self.item_factors[item])
@@ -54,15 +86,32 @@ class SVD_SGHMC:
         self.noise_scale = noise_scale
 
     def fit(self, train_data):
-        self.user_factors = np.random.normal(0, 0.1, (train_data['userId'].max()+1, self.n_factors))
-        self.item_factors = np.random.normal(0, 0.1, (train_data['movieId'].max()+1, self.n_factors))
+        self.user_factors = np.random.normal(
+            0,
+            0.1,
+            (train_data['userId'].max()+1, self.n_factors)
+        )
+        self.item_factors = np.random.normal(
+            0,
+            0.1,
+            (train_data['movieId'].max()+1, self.n_factors)
+        )
         for epoch in range(self.n_epochs):
             for row in train_data.itertuples():
                 user, item, rating = row.userId, row.movieId, row.rating
                 error = rating - self.predict(user, item)
-                noise = np.random.normal(0, self.noise_scale, self.n_factors)
-                self.user_factors[user] += self.lr * (error * self.item_factors[item] - self.reg * self.user_factors[user]) - self.friction * self.user_factors[user] + noise
-                self.item_factors[item] += self.lr * (error * self.user_factors[user] - self.reg * self.item_factors[item]) - self.friction * self.item_factors[item] + noise
+                noise = np.random.normal(
+                    0,
+                    self.noise_scale, self.n_factors
+                )
+                self.user_factors[user] += self.lr * (
+                        error * self.item_factors[item] -
+                        self.reg * self.user_factors[user]
+                ) - self.friction * self.user_factors[user] + noise
+                self.item_factors[item] += self.lr * (
+                        error * self.user_factors[user] -
+                        self.reg * self.item_factors[item]
+                ) - self.friction * self.item_factors[item] + noise
 
     def predict(self, user, item):
         return np.dot(self.user_factors[user], self.item_factors[item])
@@ -81,13 +130,27 @@ class HybridRecommender:
     def recommend(self, user, movie_ids):
         knn = NearestNeighbors(n_neighbors=self.k, metric='cosine')
         knn.fit(self.movie_factors)
-        movie_indices = [self.svd_model.item_map.get(movie_id) for movie_id in movie_ids if movie_id in self.svd_model.item_map]
+        movie_indices = [self.svd_model.item_map.get(movie_id)
+                         for movie_id in movie_ids
+                         if movie_id in self.svd_model.item_map]
         if not movie_indices:
             return []
-        distances, knn_indices = knn.kneighbors(self.movie_factors[movie_indices], n_neighbors=self.k)
+        distances, knn_indices = knn.kneighbors(
+            self.movie_factors[movie_indices], n_neighbors=self.k
+        )
         recommendations = []
         for i in range(len(movie_indices)):
-            svd_scores = [self.svd_model.predict(user, list(self.svd_model.item_map.keys())[idx]) for idx in knn_indices[i]]
-            recommendations.extend(zip([list(self.svd_model.item_map.keys())[idx] for idx in knn_indices[i]], svd_scores))
-        recommendations = sorted(recommendations, key=lambda x: x[1], reverse=True)[:10]  # Take top 10 recommendations
+            svd_scores = [self.svd_model.predict(
+                user,
+                list(self.svd_model.item_map.keys())[idx]
+            ) for idx in knn_indices[i]]
+            recommendations.extend(zip(
+                [list(self.svd_model.item_map.keys())[idx]
+                 for idx in knn_indices[i]], svd_scores
+            ))
+        recommendations = sorted(
+            recommendations,
+            key=lambda x: x[1],
+            reverse=True
+        )[:10]  # Take top 10 recommendations
         return recommendations
