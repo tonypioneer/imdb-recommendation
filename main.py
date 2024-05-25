@@ -6,8 +6,6 @@ from recommender.users import user_knn
 from recommender.movies import movie_svd
 from constants import DATA_PATHS
 
-import recommender.calculate
-
 
 # Use KNN to match the similarity of the input user, and then select the 10
 # closest other users, then for the selected movies, sort according to the
