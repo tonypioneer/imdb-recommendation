@@ -1,12 +1,9 @@
 import pandas as pd
-
+import numpy as np
 from surprise import Reader, Dataset
-from surprise import KNNBaseline
-from surprise import KNNWithMeans
-from surprise import KNNBasic
+from surprise import KNNBaseline, KNNWithMeans, KNNBasic
 from constants import DATA_PATHS
 from utils.load_data import df_movie, df_train, df_test
-
 
 class user_knn:
     def __init__(self, mode=0):
@@ -33,7 +30,6 @@ class user_knn:
         user_neighbors = self.algo.get_neighbors(user_inner_id, k=num)
         user_neighbors = [self.algo.trainset.to_raw_uid(inner_id)
                           for inner_id in user_neighbors]
-        # print(user_neighbors)
         return user_neighbors
 
     def debug(self):
@@ -56,33 +52,31 @@ class user_knn:
                     if movie[j] in movies_dict.keys():
                         movies_dict[movie[j]] += vote[j]
                     else:
-                        # Select movies that have not been watched from the
-                        # most similar users, and add the ratings
                         movies_dict[movie[j]] = vote[j]
-        # Sort by rating
         result = sorted(movies_dict.items(), key=lambda x: x[1], reverse=True)
-        result = result[:num]  # Pick the top <num> movies
-        # print(result)
+        result = result[:num]
         recommending = []
         recommending_id = []
         for i in result:
             recommending.append(df_movie[df_movie.movieId == i[0]]['title'])
             recommending_id.append(i[0])
-        return recommending, recommending_id  # Return the movie name and ID
+        return recommending, recommending_id
 
     def test(self, num=10):
         results = []
         for user in self.userid:
             _, ids = self.recommend(user, num)
-            # print(ids)
             results.append(ids)
 
-        # Create DataFrame from results
         df_results = pd.DataFrame(results)
-
-        # Convert list of IDs in 'result' column to a string if needed
         df_results['result'] = df_results['result'].apply(
             lambda x: ','.join(map(str, x)))
-
-        # Write to CSV
         df_results.to_csv(DATA_PATHS.RESULT_DATASET, index=False)
+
+    def get_user_embeddings_knn(self):
+        # Extract the user embeddings from the similarity matrix
+        num_users = len(self.algo.trainset.all_users())
+        user_embeddings = np.zeros((num_users, num_users))
+        for user_id in range(num_users):
+            user_embeddings[user_id] = self.algo.sim[user_id]
+        return user_embeddings
