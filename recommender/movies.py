@@ -18,6 +18,7 @@ class movie_svd:
             cv=5,
             verbose=True
         )
+        print(results)
         trainset = data.build_full_trainset()
         self.svd.fit(trainset)
 
