@@ -11,9 +11,8 @@ from sklearn.metrics.pairwise import linear_kernel
 import sys
 import os
 sys.path.insert(0, '../docs')
-from personal_recommender.KNN_movie import Movie_KNN_recommender
 from recommender.users import user_knn
-from recommender.movies import movie_svd
+from recommender.movies import movie_svd, movie_knn
 
 # First, use KNN to match the similarity of the input user, and then select the
 # 10 closest other users. Then for the selected movies, recommend the top ten
@@ -24,9 +23,9 @@ class knn_all:
     def __init__(self, mode=0):
         # self.movie = Movie_KNN_recommender()
         self.user = user_knn()
-        self.index = pd.read_csv('../data/personal/movies.csv')
+        self.index = pd.read_csv('data/input/movies.csv')
         self.reader = Reader()
-        self.ratings = pd.read_csv('../data/personal/ratings.csv')
+        self.ratings = pd.read_csv('data/input/ratings.csv')
         data = Dataset.load_from_df(self.ratings[['userId', 'movieId', 'rating']], self.reader)
         trainset = data.build_full_trainset()
         sim_options = {'name': 'pearson_baseline', 'user_based': False}
@@ -73,11 +72,11 @@ class knn_all:
         return movie
 
 
+if __name__ == '__main__':
 
+    test = knn_all()
+    result = test.recommend(34,480)
 
-test = knn_all()
-result = test.recommend(34,480)
-
-for i in result:
-    print(i.values[0])
+    for i in result:
+        print(i.values[0])
     

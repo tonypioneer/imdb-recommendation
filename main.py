@@ -5,6 +5,7 @@ from utils.load_data import df, df_test
 from recommender.users import user_knn
 from recommender.movies import movie_svd
 from constants import DATA_PATHS
+from recommender.knn import knn_all
 
 
 # Use KNN to match the similarity of the input user, and then select the 10
@@ -60,6 +61,12 @@ if __name__ == '__main__':
         # to rating
         rating_matrix[user_index, movie_index] = rating
 
-    test = movie_recommender()
-    # test.recommend(2)
-    test.test()
+    # test = movie_recommender()
+    # # test.recommend(2)
+    # test.test()
+
+    test = knn_all()
+    result = test.recommend(34, 480)
+
+    for i in result:
+        print(i.values[0])
