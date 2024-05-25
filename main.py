@@ -1,24 +1,20 @@
 import numpy as np
-
-from utils.load_data import df
-
 import pandas as pd
-import sys
-import os
 import csv
 
-sys.path.insert(0, 'docs')
-from recommender.users import Personal_KNN_recommender
-from recommender.movies import Personal_SVD_recommender
+from utils.load_data import df, df_movie, df_rating, df_train, df_test
+from recommender.users import user_knn
+from recommender.movies import movie_svd
 
 
-# 首先用KNN对输入的用户进行相似度匹配，然后挑选出最接近的10个其他用户
-# 之后对于选出的电影，根据SVD计算用户对电影的模拟评分来进行排序
+# Use KNN to match the similarity of the input user, and then select the 10
+# closest other users, then for the selected movies, sort according to the
+# simulated rating of the user to the movie
 
-class KNN_SVD_ensemble:
+class movie_recommender:
     def __init__(self):
-        self.user = Personal_KNN_recommender()
-        self.movie = Personal_SVD_recommender()
+        self.user = user_knn()
+        self.movie = movie_svd()
         self.testings = pd.read_csv('data/output/test.csv')
         self.userid = []
         for i in range(len(self.testings['userId'])):
@@ -68,6 +64,6 @@ if __name__ == '__main__':
         # to rating
         rating_matrix[user_index, movie_index] = rating
 
-    test = KNN_SVD_ensemble()
+    test = movie_recommender()
     # test.recommend(2)
     test.test(10)

@@ -12,7 +12,7 @@ from surprise import KNNBasic
 import csv
 
 
-class Personal_KNN_recommender:
+class user_knn:
     def __init__(self, mode=0):
         self.index = pd.read_csv('data/input/movies.csv')
         self.reader = Reader()

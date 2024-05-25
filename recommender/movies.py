@@ -4,7 +4,7 @@ import os
 from surprise import Reader, Dataset, SVD
 from surprise.model_selection import cross_validate
 
-class Personal_SVD_recommender:
+class movie_svd:
     def __init__(self):
         self.reader = Reader()
         self.ratings = pd.read_csv('data/output/train.csv')
