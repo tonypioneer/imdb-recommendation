@@ -2,12 +2,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
-from utils.load_data import df, df_test
+from utils.load_data import df, df_test, df_movie, df_rating
 from recommender.users import user_knn
 from recommender.movies import movie_svd
 from constants import DATA_PATHS
 from recommender.knn import knn_all
 import time
+from mpl_toolkits.mplot3d import Axes3D
 
 class movie_recommender:
     def __init__(self):
@@ -69,50 +70,84 @@ if __name__ == '__main__':
     user_embeddings_knn = test_hybrid.user.get_user_embeddings_knn()
     movie_embeddings_knn = test_knn.get_movie_embeddings_knn()
 
-    print("Reducing embeddings for hybrid method")
-    pca = PCA(n_components=2)
-    reduced_user_data_hybrid = pca.fit_transform(user_embeddings_hybrid)
-    reduced_movie_data_hybrid = pca.fit_transform(movie_embeddings_hybrid)
+    # Calculate average ratings for movies
+    avg_ratings = df_rating.groupby('movieId')['rating'].mean()
+    movie_ids = df_movie['movieId'].unique()
+    avg_ratings_array = np.array([avg_ratings.get(mid, 0) for mid in movie_ids])
 
-    print("Reducing embeddings for KNN method")
-    reduced_user_data_knn = pca.fit_transform(user_embeddings_knn)
-    reduced_movie_data_knn = pca.fit_transform(movie_embeddings_knn)
+    # Reduce embeddings to 3D for visualization
+    print("Reducing embeddings for hybrid method to 3D")
+    pca_3d = PCA(n_components=3)
+    reduced_user_data_hybrid_3d = pca_3d.fit_transform(user_embeddings_hybrid)
+    reduced_movie_data_hybrid_3d = pca_3d.fit_transform(movie_embeddings_hybrid)
 
-    subset_user_ids = df['userId'].unique()[:len(reduced_user_data_hybrid)]
-    subset_movie_ids = df['movieId'].unique()[:len(reduced_movie_data_hybrid)]
+    print("Reducing embeddings for KNN method to 3D")
+    reduced_user_data_knn_3d = pca_3d.fit_transform(user_embeddings_knn)
+    reduced_movie_data_knn_3d = pca_3d.fit_transform(movie_embeddings_knn)
 
-    print("Plotting clusters for Hybrid method (User Clusters)")
-    plt.figure(figsize=(10, 6))
-    scatter = plt.scatter(reduced_user_data_hybrid[:, 0], reduced_user_data_hybrid[:, 1], c=subset_user_ids, cmap='viridis', alpha=0.6)
+    # Select a subset of user IDs and movie IDs to match the reduced data points
+    subset_user_ids = df['userId'].unique()[:len(reduced_user_data_hybrid_3d)]
+    subset_movie_ids = df['movieId'].unique()[:len(reduced_movie_data_hybrid_3d)]
+
+    # 3D Scatter Plot for User Clusters (Hybrid Method)
+    print("Plotting 3D clusters for Hybrid method (User Clusters)")
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection='3d')
+    scatter = ax.scatter(reduced_user_data_hybrid_3d[:, 0], reduced_user_data_hybrid_3d[:, 1], reduced_user_data_hybrid_3d[:, 2], c=subset_user_ids, cmap='viridis', alpha=0.6)
     plt.colorbar(scatter)
-    plt.title('User Clusters (Hybrid Method)')
-    plt.xlabel('Component 1')
-    plt.ylabel('Component 2')
+    ax.set_title('User Clusters (Hybrid Method)')
+    ax.set_xlabel('Component 1')
+    ax.set_ylabel('Component 2')
+    ax.set_zlabel('Component 3')
     plt.show()
 
-    print("Plotting clusters for Hybrid method (Movie Clusters)")
-    plt.figure(figsize=(10, 6))
-    scatter = plt.scatter(reduced_movie_data_hybrid[:, 0], reduced_movie_data_hybrid[:, 1], c=subset_movie_ids, cmap='viridis', alpha=0.6)
+    # 3D Scatter Plot for Movie Clusters (Hybrid Method)
+    print("Plotting 3D clusters for Hybrid method (Movie Clusters)")
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection='3d')
+    scatter = ax.scatter(reduced_movie_data_hybrid_3d[:, 0], reduced_movie_data_hybrid_3d[:, 1], reduced_movie_data_hybrid_3d[:, 2], c=avg_ratings_array[:len(reduced_movie_data_hybrid_3d)], cmap='viridis', alpha=0.6)
     plt.colorbar(scatter)
-    plt.title('Movie Clusters (Hybrid Method)')
-    plt.xlabel('Component 1')
-    plt.ylabel('Component 2')
+    ax.set_title('Movie Clusters (Hybrid Method)')
+    ax.set_xlabel('Component 1')
+    ax.set_ylabel('Component 2')
+    ax.set_zlabel('Component 3')
     plt.show()
 
-    print("Plotting clusters for KNN method (User Clusters)")
-    plt.figure(figsize=(10, 6))
-    scatter = plt.scatter(reduced_user_data_knn[:, 0], reduced_user_data_knn[:, 1], c=subset_user_ids, cmap='viridis', alpha=0.6)
+    # 3D Scatter Plot for User Clusters (KNN Method)
+    print("Plotting 3D clusters for KNN method (User Clusters)")
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection='3d')
+    scatter = ax.scatter(reduced_user_data_knn_3d[:, 0], reduced_user_data_knn_3d[:, 1], reduced_user_data_knn_3d[:, 2], c=subset_user_ids, cmap='viridis', alpha=0.6)
     plt.colorbar(scatter)
-    plt.title('User Clusters (KNN Method)')
-    plt.xlabel('Component 1')
-    plt.ylabel('Component 2')
+    ax.set_title('User Clusters (KNN Method)')
+    ax.set_xlabel('Component 1')
+    ax.set_ylabel('Component 2')
+    ax.set_zlabel('Component 3')
     plt.show()
 
-    print("Plotting clusters for KNN method (Movie Clusters)")
-    plt.figure(figsize=(10, 6))
-    scatter = plt.scatter(reduced_movie_data_knn[:, 0], reduced_movie_data_knn[:, 1], c=subset_movie_ids, cmap='viridis', alpha=0.6)
+    # 3D Scatter Plot for Movie Clusters (KNN Method)
+    print("Plotting 3D clusters for KNN method (Movie Clusters)")
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection='3d')
+    scatter = ax.scatter(reduced_movie_data_knn_3d[:, 0], reduced_movie_data_knn_3d[:, 1], reduced_movie_data_knn_3d[:, 2], c=avg_ratings_array[:len(reduced_movie_data_knn_3d)], cmap='viridis', alpha=0.6)
     plt.colorbar(scatter)
-    plt.title('Movie Clusters (KNN Method)')
-    plt.xlabel('Component 1')
-    plt.ylabel('Component 2')
+    ax.set_title('Movie Clusters (KNN Method)')
+    ax.set_xlabel('Component 1')
+    ax.set_ylabel('Component 2')
+    ax.set_zlabel('Component 3')
+    plt.show()
+
+    # 2D Scatter Plot with Movie Titles
+    print("Plotting 2D scatter plot with movie titles")
+    movie_titles = df_movie['title'].unique()[:len(reduced_movie_data_knn_3d)]
+    reduced_movie_data_titles = PCA(n_components=2).fit_transform(movie_embeddings_knn)
+
+    fig, ax = plt.subplots(figsize=(12, 8))
+    scatter = ax.scatter(reduced_movie_data_titles[:, 0], reduced_movie_data_titles[:, 1], alpha=0.6, c=avg_ratings_array[:len(reduced_movie_data_titles)], cmap='viridis')
+    plt.colorbar(scatter)
+    for i, title in enumerate(movie_titles):
+        ax.text(reduced_movie_data_titles[i, 0], reduced_movie_data_titles[i, 1], title, fontsize=9)
+    ax.set_title('Movie Titles in 2D PCA Space')
+    ax.set_xlabel('Component 1')
+    ax.set_ylabel('Component 2')
     plt.show()
