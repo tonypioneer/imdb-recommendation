@@ -24,12 +24,6 @@ class movie_svd:
     def rating(self, usrID, movieID):
         rate = self.svd.predict(usrID, movieID)
         return rate[3]
-<<<<<<< Updated upstream
-=======
-    
-    def sample_movies(self, n):
-        pass
->>>>>>> Stashed changes
 
     # Used to simulate user ratings for a given list, and then further select,
     # which is a second-order step

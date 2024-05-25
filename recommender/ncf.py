@@ -1,14 +1,14 @@
 import pandas as pd
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.models import Model
+from tensorflow.keras import models
 from tensorflow.keras.layers import Embedding, Input, Flatten, Dense, Concatenate
 from tensorflow.keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
 # Load data
-ratings = pd.read_csv('./data/input/ratings.csv')
+ratings = pd.read_csv('../data/input/ratings.csv')
 
 # Check the maximum userId and movieId in the dataset
 max_user_id = ratings['userId'].max()
@@ -36,7 +36,7 @@ def NCF_model(n_users, n_items, embedding_size=50):
     dense = Dense(128, activation='relu')(concat)
     output = Dense(1)(dense)
     
-    model = Model([user_input, item_input], output)
+    model = models.Model([user_input, item_input], output)
     model.compile(optimizer=Adam(), loss='mean_squared_error')
     
     return model
