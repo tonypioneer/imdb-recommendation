@@ -1,26 +1,18 @@
-import csv
-from surprise import Reader, Dataset
-from surprise import KNNBaseline, KNNWithMeans, KNNBasic
-from utils.load_data import df_movie, df_rating, df_train, df_test
 import pandas as pd
-import numpy as np
-import os
-from surprise import Reader, Dataset, SVD
+
+from surprise import Reader, Dataset
 from surprise import KNNBaseline
 from surprise import KNNWithMeans
 from surprise import KNNBasic
-import csv
 from constants import DATA_PATHS
+from utils.load_data import df_movie, df_train, df_test
 
 
 class user_knn:
     def __init__(self, mode=0):
-        self.index = pd.read_csv('data/input/movies.csv')
         self.reader = Reader()
-        self.ratings = pd.read_csv('data/output/train.csv')
-        self.testings = pd.read_csv('data/output/test.csv')
         data = Dataset.load_from_df(
-            self.ratings[['userId', 'movieId', 'rating']],
+            df_train[['userId', 'movieId', 'rating']],
             self.reader
         )
         trainset = data.build_full_trainset()
@@ -33,10 +25,7 @@ class user_knn:
             self.algo = KNNBasic(sim_options=sim_options)
         else:
             exit(0)
-        self.userid = []
-        for i in range(len(self.testings['userId'])):
-            if not self.testings['userId'][i] in self.userid:
-                self.userid.append(self.testings['userId'][i])
+        self.userid = df_test['userId'].unique().tolist()
         self.algo.fit(trainset)
 
     def get_similar_users(self, usrID, num=10):
@@ -49,25 +38,24 @@ class user_knn:
 
     def debug(self):
         similar_users = self.get_similar_users(1, 1)
-        print(self.ratings[self.ratings.userId == 1].head())
+        print(df_train[df_train.userId == 1].head())
         for i in similar_users:
-            print(list(self.ratings[self.ratings.userId == i]['movieId']))
+            print(list(df_train[df_train.userId == i]['movieId']))
 
     def recommend(self, usrID, num=5):
         existed_movie = list(
-            self.ratings[self.ratings.userId == usrID]['movieId']
+            df_train[df_train.userId == usrID]['movieId']
         )
         similar_users = self.get_similar_users(usrID, num)
         movies_dict = {}
         for i in similar_users:
-            movie = list(self.ratings[self.ratings.userId == i]['movieId'])
-            vote = list(self.ratings[self.ratings.userId == i]['rating'])
+            movie = list(df_train[df_train.userId == i]['movieId'])
+            vote = list(df_train[df_train.userId == i]['rating'])
             for j in range(len(vote)):
                 if not (movie[j] in existed_movie):
                     if movie[j] in movies_dict.keys():
                         movies_dict[movie[j]] += vote[j]
                     else:
-
                         # Select movies that have not been watched from the
                         # most similar users, and add the ratings
                         movies_dict[movie[j]] = vote[j]
@@ -78,19 +66,23 @@ class user_knn:
         recommending = []
         recommending_id = []
         for i in result:
-            recommending.append(self.index[self.index.movieId == i[0]]['title'])
+            recommending.append(df_movie[df_movie.movieId == i[0]]['title'])
             recommending_id.append(i[0])
         return recommending, recommending_id  # Return the movie name and ID
 
     def test(self, num=10):
-        result = []
+        results = []
         for user in self.userid:
             _, ids = self.recommend(user, num)
             # print(ids)
-            result.append(ids)
+            results.append(ids)
 
-        with open(DATA_PATHS.RESULT_DATASET, "w") as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(['userId', 'result'])
-            for i, row in enumerate(result):
-                writer.writerow([self.userid[i], row])
+        # Create DataFrame from results
+        df_results = pd.DataFrame(results)
+
+        # Convert list of IDs in 'result' column to a string if needed
+        df_results['result'] = df_results['result'].apply(
+            lambda x: ','.join(map(str, x)))
+
+        # Write to CSV
+        df_results.to_csv(DATA_PATHS.RESULT_DATASET, index=False)

@@ -1,66 +1,8 @@
-import csv
-import random
-
-import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.metrics import mean_squared_error
 from sklearn.neighbors import NearestNeighbors
-
-# Load data
-ratings = pd.read_csv('./data/input/ratings.csv')
-usrid = []
-movieid = []
-for i in range(len(ratings['userId'])):
-    if ratings['userId'][i] not in usrid:
-        usrid.append(ratings['userId'][i])
-    if ratings['movieId'][i] not in movieid:
-        movieid.append(ratings['movieId'][i])
-
-print(len(usrid))
-print(len(movieid))
-
-train = []
-valid = []
-data_all = []
-index = 0
-for user in usrid:
-    this_user = []
-    if index >= len(ratings['userId']):
-        break
-    while ratings['userId'][index] == user:
-        temp = [ratings['userId'][index], ratings['movieId'][index],
-                ratings['rating'][index]]
-        this_user.append(temp)
-        index += 1
-        if index >= len(ratings['userId']):
-            break
-    print(len(this_user))
-    data_all.append(this_user)
-
-threshold = 0.85
-test_data = []
-with open("./data/output/train.csv", "w") as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerow(['userId', 'movieId', 'rating'])
-    for this_user in data_all:
-        length = len(this_user)
-        for i in range(length):
-            temp = random.random()
-            if temp < threshold:
-                writer.writerow(this_user[i])
-            else:
-                test_data.append(this_user[i])
-
-with open("./data/output/test.csv", "w") as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerow(['userId', 'movieId', 'rating'])
-    for row in test_data:
-        writer.writerow(row)
-
-train_data = pd.read_csv("./data/output/train.csv")
-test_data = pd.read_csv("./data/output/test.csv")
 
 
 class SVD_SGD:
