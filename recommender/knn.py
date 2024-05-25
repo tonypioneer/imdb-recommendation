@@ -1,28 +1,15 @@
+# In knn_all
 import pandas as pd
 import numpy as np
 import os
-from surprise import Reader, Dataset, SVD
-from surprise import KNNBaseline
-from surprise import KNNWithMeans
-from surprise import KNNBasic
-from surprise.model_selection import cross_validate
-import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import linear_kernel
-import sys
-import os
-sys.path.insert(0, '../docs')
+from surprise import Reader, Dataset, KNNBaseline, KNNWithMeans, KNNBasic
+from utils.load_data import df, df_test
 from recommender.users import user_knn
-from recommender.movies import movie_svd, movie_knn
-
-# First, use KNN to match the similarity of the input user, and then select the
-# 10 closest other users. Then for the selected movies, recommend the top ten
-# movies based on the similarity with the movie given by the user. The input is
-# the user ID and the movie ID
+from recommender.movies import movie_svd
+from surprise.model_selection import cross_validate
 
 class knn_all:
     def __init__(self, mode=0):
-        # self.movie = Movie_KNN_recommender()
         self.user = user_knn()
         self.index = pd.read_csv('data/input/movies.csv')
         self.reader = Reader()
@@ -49,10 +36,12 @@ class knn_all:
         print(results)
         self.algo.fit(trainset)
         self.sim = self.algo.compute_similarities()
+
     def cal_similarity(self, movieID, waitingID):
         movie_inner_id = self.algo.trainset.to_inner_iid(movieID)
         waiting_inner_id = self.algo.trainset.to_inner_iid(waitingID)
         return self.sim[movie_inner_id, waiting_inner_id]
+
     def showSeenMovies(self, usrID):
         print("\n\nThe user has seen movies below: ")
         movies = []
@@ -61,10 +50,12 @@ class knn_all:
                 movies.append(self.index[self.index.movieId == self.ratings['movieId'][i]]['title'])
         for i in movies:
             print(i.values[0])
+
     def showInputMovie(self, movieID):
         print("\n\nThe user's input movie is: ")
-        print(self.index[self.index.movieId==movieID]['title'])
+        print(self.index[self.index.movieId == movieID]['title'])
         print('\n\n')
+
     def recommend(self, usrID, movieID, num=10):
         self.showSeenMovies(usrID)
         self.showInputMovie(movieID)
@@ -80,12 +71,16 @@ class knn_all:
             movie.append(self.index[self.index.movieId == i[0]]['title'])
         return movie
 
+    def get_movie_embeddings_knn(self):
+        # Extract movie embeddings from the similarity matrix
+        num_movies = len(self.algo.trainset.all_items())
+        movie_embeddings = np.zeros((num_movies, num_movies))
+        for movie_id in range(num_movies):
+            movie_embeddings[movie_id] = self.sim[movie_id]
+        return movie_embeddings
 
 if __name__ == '__main__':
-
     test = knn_all()
-    result = test.recommend(34,480)
-
+    result = test.recommend(34, 480)
     for i in result:
         print(i.values[0])
-    
