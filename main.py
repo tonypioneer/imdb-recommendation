@@ -62,6 +62,6 @@ if __name__ == '__main__':
         # to rating
         rating_matrix[user_index, movie_index] = rating
 
-    # test = movie_recommender()
-    # # test.recommend(2)
-    # test.test()
+    test = movie_recommender()
+    # test.recommend(2)
+    test.test()
