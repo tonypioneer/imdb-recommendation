@@ -1,5 +1,7 @@
 import numpy as np
 
+from sklearn.neighbors import NearestNeighbors
+
 class SVD_SGD:
     def __init__(self, n_factors, lr, reg, n_epochs):
         self.n_factors = n_factors
@@ -115,8 +117,6 @@ class SVD_SGHMC:
 
     def predict(self, user, item):
         return np.dot(self.user_factors[user], self.item_factors[item])
-    
-from sklearn.neighbors import NearestNeighbors
 
 class HybridRecommender:
     def __init__(self, svd_model, k=10):

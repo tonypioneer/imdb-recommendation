@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from utils.load_data import df, df_movie, df_rating, df_train, df_test
+from utils.load_data import df, df_test
 from recommender.users import user_knn
 from recommender.movies import movie_svd
 from constants import DATA_PATHS
@@ -17,7 +17,7 @@ class movie_recommender:
     def __init__(self):
         self.user = user_knn()
         self.movie = movie_svd()
-        self.userid = df_test['userId'].drop_duplicates().tolist()
+        self.userid = df_test['userId'].unique().tolist()
 
     def recommend(self, userID, first_num=50, second_num=10):
         _, first_ids = self.user.recommend(userID, first_num)
@@ -62,6 +62,6 @@ if __name__ == '__main__':
         # to rating
         rating_matrix[user_index, movie_index] = rating
 
-    # test = movie_recommender()
-    # # test.recommend(2)
-    # test.test()
+    test = movie_recommender()
+    # test.recommend(2)
+    test.test()
