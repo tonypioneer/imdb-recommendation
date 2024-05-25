@@ -222,14 +222,63 @@ class HybridRecommender:
         recommendations = sorted(recommendations, key=lambda x: x[1], reverse=True)[:10]  # Take top 10 recommendations
         return recommendations
 
+    def get_all_predictions(self, test_data):
+        predictions = []
+        for row in test_data.itertuples():
+            user = self.svd_model.user_map.get(row.userId, -1)
+            if user == -1:
+                predictions.append(np.mean(train_data['rating']))  # Fallback to global mean rating
+                continue
+            movie_ids = [row.movieId]
+            user_recommendations = self.recommend(user, movie_ids)
+            if user_recommendations:
+                predicted_rating = user_recommendations[0][1]  # Get top recommendation score
+                predictions.append(predicted_rating)
+            else:
+                predictions.append(np.mean(train_data['rating']))  # Fallback to global mean rating
+        return predictions
+
+
 # Use the HybridRecommender with the SGD optimiser to make recommendations and visualise the result
-hybrid_recommender = HybridRecommender(svd_sgd)
-hybrid_recommender.fit(train_data)
+hybrid_recommender_sgd = HybridRecommender(svd_sgd)
+hybrid_recommender_sgd.fit(train_data)
+
+# Get all predictions for the test dataset
+test_predictions = hybrid_recommender_sgd.get_all_predictions(test_data)
+
+# Calculate RMSE
+true_ratings = test_data['rating'].values
+rmse_hybrid_sgd = np.sqrt(mean_squared_error(true_ratings, test_predictions))
+print(f'RMSE for Hybrid Recommender with SGD: {rmse_hybrid_sgd}')
+
+# Use the HybridRecommender with the SGLD optimiser to make recommendations and visualise the result
+hybrid_recommender_sgld = HybridRecommender(svd_sgld)
+hybrid_recommender_sgld.fit(train_data)
+
+# Get all predictions for the test dataset
+test_predictions = hybrid_recommender_sgld.get_all_predictions(test_data)
+
+# Calculate RMSE
+true_ratings = test_data['rating'].values
+rmse_hybrid_sgld = np.sqrt(mean_squared_error(true_ratings, test_predictions))
+print(f'RMSE for Hybrid Recommender with SGD: {rmse_hybrid_sgld}')
+
+# Use the HybridRecommender with the SGHMC optimiser to make recommendations and visualise the result
+hybrid_recommender_sghmc = HybridRecommender(svd_sghmc)
+hybrid_recommender_sghmc.fit(train_data)
+
+# Get all predictions for the test dataset
+test_predictions = hybrid_recommender_sghmc.get_all_predictions(test_data)
+
+# Calculate RMSE
+true_ratings = test_data['rating'].values
+rmse_hybrid_sghmc = np.sqrt(mean_squared_error(true_ratings, test_predictions))
+print(f'RMSE for Hybrid Recommender with SGD: {rmse_hybrid_sghmc}')
 
 # Example recommendation for a user (e.g., user with ID 1)
 user_id = 1
 movie_ids = test_data['movieId'].unique()[:100]  # Use a subset of movie IDs for demonstration
-recommendations = hybrid_recommender.recommend(user_id, movie_ids)
+recommendations = hybrid_recommender_sgd.recommend(user_id, movie_ids)
 
 print("Top 10 movie recommendations for user ID 1:")
 for movie_id, score in recommendations[:10]:

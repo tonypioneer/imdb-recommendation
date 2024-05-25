@@ -25,7 +25,7 @@ class movie_recommender:
         start_time = time.time()
         second_ids, movie_id = self.movie.recommend(userID, first_ids, second_num)
         print(f"Movie SVD recommendation for user {userID} took {time.time() - start_time} seconds")
-        
+
         return movie_id
 
     def test(self):
@@ -37,7 +37,7 @@ class movie_recommender:
 
         df_result = pd.DataFrame(results)
         df_result.to_csv(DATA_PATHS.RESULT_DATASET, index=False)
-        
+
     def get_user_embeddings_hybrid(self):
         return self.user.get_user_embeddings_knn()
 
@@ -55,6 +55,16 @@ if __name__ == '__main__':
         movie_index = row['movieId'] - 1
         rating = row['rating']
         rating_matrix[user_index, movie_index] = rating
+
+    # test = movie_recommender()
+    # test.recommend(2)
+    # test.test()
+
+    # test = knn_all()
+    # result = test.recommend(34, 480)
+    #
+    # for i in result:
+    #     print(i.values[0])
 
     print("Testing hybrid method (SVD + KNN)")
     test_hybrid = movie_recommender()

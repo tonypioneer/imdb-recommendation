@@ -6,6 +6,7 @@ from surprise import Reader, Dataset, KNNBaseline, KNNWithMeans, KNNBasic
 from utils.load_data import df, df_test
 from recommender.users import user_knn
 from recommender.movies import movie_svd
+from surprise.model_selection import cross_validate
 
 class knn_all:
     def __init__(self, mode=0):
@@ -25,6 +26,14 @@ class knn_all:
         else:
             exit(0)
 
+        results = cross_validate(
+            self.algo,
+            data,
+            measures=['RMSE', 'MAE'],
+            cv=5,
+            verbose=True
+        )
+        print(results)
         self.algo.fit(trainset)
         self.sim = self.algo.compute_similarities()
 
