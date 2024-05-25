@@ -86,7 +86,7 @@ if __name__ == '__main__':
     avg_ratings_array = np.array([avg_ratings.get(mid, 0) for mid in df_movie['movieId']])
 
     inertia = []
-    K_range = range(1, 15)
+    K_range = range(10, 150, 10)
     for K in K_range:
         kmeans = KMeans(n_clusters=K, random_state=0).fit(user_embeddings_hybrid)
         inertia.append(kmeans.inertia_) # Plot the elbow graph
@@ -98,7 +98,7 @@ if __name__ == '__main__':
     plt.show()
 
     inertia = []
-    K_range = range(1, 15)
+    K_range = range(10, 150, 10)
     for K in K_range:
         kmeans = KMeans(n_clusters=K, random_state=0).fit(movie_embeddings_hybrid)
         inertia.append(kmeans.inertia_) # Plot the elbow graph
@@ -110,7 +110,7 @@ if __name__ == '__main__':
     plt.show()
 
     inertia = []
-    K_range = range(1, 15)
+    K_range = range(10, 150, 10)
     for K in K_range:
         kmeans = KMeans(n_clusters=K, random_state=0).fit(user_embeddings_knn)
         inertia.append(kmeans.inertia_) # Plot the elbow graph
@@ -122,7 +122,7 @@ if __name__ == '__main__':
     plt.show()
 
     inertia = []
-    K_range = range(1, 15)
+    K_range = range(10, 150, 10)
     for K in K_range:
         kmeans = KMeans(n_clusters=K, random_state=0).fit(movie_embeddings_knn)
         inertia.append(kmeans.inertia_) # Plot the elbow graph
