@@ -61,12 +61,12 @@ if __name__ == '__main__':
         # to rating
         rating_matrix[user_index, movie_index] = rating
 
-    test = movie_recommender()
-    # test.recommend(2)
-    test.test()
+    # test = movie_recommender()
+    # # test.recommend(2)
+    # test.test()
 
-    # test = knn_all()
-    # result = test.recommend(34, 480)
-    #
-    # for i in result:
-    #     print(i.values[0])
+    test = knn_all()
+    result = test.recommend(34, 480)
+
+    for i in result:
+        print(i.values[0])

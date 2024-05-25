@@ -5,6 +5,7 @@ from surprise import Reader, Dataset, SVD
 from surprise import KNNBaseline
 from surprise import KNNWithMeans
 from surprise import KNNBasic
+from surprise.model_selection import cross_validate
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
@@ -38,6 +39,14 @@ class knn_all:
         else:
             exit(0)
 
+        results = cross_validate(
+            self.algo,
+            data,
+            measures=['RMSE', 'MAE'],
+            cv=5,
+            verbose=True
+        )
+        print(results)
         self.algo.fit(trainset)
         self.sim = self.algo.compute_similarities()
     def cal_similarity(self, movieID, waitingID):
@@ -64,7 +73,7 @@ class knn_all:
         similarity = {}
         for i in first_ids:
             similarity[i] = self.cal_similarity(movieID, i)
-        result = sorted(similarity.items(), key=lambda x: x[1], reverse=True)  # 对相似度进行排序
+        result = sorted(similarity.items(), key=lambda x: x[1], reverse=True)
         result = result[:num]
         movie = []
         for i in result:
