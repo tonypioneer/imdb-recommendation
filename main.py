@@ -96,15 +96,18 @@ if __name__ == '__main__':
     reduced_movie_data_knn_3d = pca_3d.fit_transform(movie_embeddings_knn)
 
     # Apply K-means clustering
-    kmeans_user_hybrid = KMeans(n_clusters=5).fit(reduced_user_data_hybrid_3d)
-    kmeans_movie_hybrid = KMeans(n_clusters=5).fit(reduced_movie_data_hybrid_3d)
-    kmeans_user_knn = KMeans(n_clusters=5).fit(reduced_user_data_knn_3d)
-    kmeans_movie_knn = KMeans(n_clusters=5).fit(reduced_movie_data_knn_3d)
+    kmeans_user_hybrid = KMeans(n_clusters=3).fit(reduced_user_data_hybrid_3d)
+    kmeans_movie_hybrid = KMeans(n_clusters=3).fit(reduced_movie_data_hybrid_3d)
+    kmeans_user_knn = KMeans(n_clusters=3).fit(reduced_user_data_knn_3d)
+    kmeans_movie_knn = KMeans(n_clusters=3).fit(reduced_movie_data_knn_3d)
 
     # Select a subset of user IDs and movie IDs to match the reduced data points
     subset_user_ids = df['userId'].unique()[:len(reduced_user_data_hybrid_3d)]
     subset_movie_ids = df['movieId'].unique()[:len(reduced_movie_data_hybrid_3d)]
 
+    random_user_indices = np.random.choice(user_embeddings_hybrid.shape[0], 100, replace=False) 
+    subset_user_ids = df['userId'].unique()[random_user_indices]
+    
     # 3D Scatter Plot for User Clusters (Hybrid Method)
     print("Plotting 3D clusters for Hybrid method (User Clusters)")
     fig = plt.figure(figsize=(10, 7))
@@ -200,11 +203,11 @@ if __name__ == '__main__':
 
     # 2D Scatter Plot with Movie Titles
     print("Plotting 2D scatter plot with movie titles")
-    movie_titles = df_movie['title'].unique()[:len(reduced_movie_data_knn_2d)]
-    reduced_movie_data_titles = PCA(n_components=2).fit_transform(movie_embeddings_knn)
+    movie_titles = df_movie['title'].unique()[:30]  # Limit to 30 movie titles
+    reduced_movie_data_titles = PCA(n_components=2).fit_transform(movie_embeddings_knn[:30])  # Plot only the first 30 movies
 
     fig, ax = plt.subplots(figsize=(12, 8))
-    scatter = ax.scatter(reduced_movie_data_titles[:, 0], reduced_movie_data_titles[:, 1], alpha=0.6, c=avg_ratings_array[:len(reduced_movie_data_titles)], cmap='viridis')
+    scatter = ax.scatter(reduced_movie_data_titles[:, 0], reduced_movie_data_titles[:, 1], alpha=0.6, c=avg_ratings_array[:30], cmap='viridis')
     plt.colorbar(scatter, label='Average Rating')
     for i, title in enumerate(movie_titles):
         ax.text(reduced_movie_data_titles[i, 0], reduced_movie_data_titles[i, 1], title, fontsize=9)
