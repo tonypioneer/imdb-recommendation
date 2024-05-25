@@ -85,6 +85,54 @@ if __name__ == '__main__':
     avg_ratings = df_rating.groupby('movieId')['rating'].mean()
     avg_ratings_array = np.array([avg_ratings.get(mid, 0) for mid in df_movie['movieId']])
 
+    inertia = []
+    K_range = range(1, 15)
+    for K in K_range:
+        kmeans = KMeans(n_clusters=K, random_state=0).fit(user_embeddings_hybrid)
+        inertia.append(kmeans.inertia_) # Plot the elbow graph
+    plt.figure(figsize=(8, 6))
+    plt.plot(K_range, inertia, 'bo-')
+    plt.xlabel('Number of clusters (K)')
+    plt.ylabel('Inertia')
+    plt.title('Elbow Method For Optimal K (user_embeddings_hybrid)')
+    plt.show()
+
+    inertia = []
+    K_range = range(1, 15)
+    for K in K_range:
+        kmeans = KMeans(n_clusters=K, random_state=0).fit(movie_embeddings_hybrid)
+        inertia.append(kmeans.inertia_) # Plot the elbow graph
+    plt.figure(figsize=(8, 6))
+    plt.plot(K_range, inertia, 'bo-')
+    plt.xlabel('Number of clusters (K)')
+    plt.ylabel('Inertia')
+    plt.title('Elbow Method For Optimal K (movie_embeddings_hybrid)')
+    plt.show()
+
+    inertia = []
+    K_range = range(1, 15)
+    for K in K_range:
+        kmeans = KMeans(n_clusters=K, random_state=0).fit(user_embeddings_knn)
+        inertia.append(kmeans.inertia_) # Plot the elbow graph
+    plt.figure(figsize=(8, 6))
+    plt.plot(K_range, inertia, 'bo-')
+    plt.xlabel('Number of clusters (K)')
+    plt.ylabel('Inertia')
+    plt.title('Elbow Method For Optimal K (user_embeddings_knn)')
+    plt.show()
+
+    inertia = []
+    K_range = range(1, 15)
+    for K in K_range:
+        kmeans = KMeans(n_clusters=K, random_state=0).fit(movie_embeddings_knn)
+        inertia.append(kmeans.inertia_) # Plot the elbow graph
+    plt.figure(figsize=(8, 6))
+    plt.plot(K_range, inertia, 'bo-')
+    plt.xlabel('Number of clusters (K)')
+    plt.ylabel('Inertia')
+    plt.title('Elbow Method For Optimal K (movie_embeddings_knn)')
+    plt.show()
+
     # Reduce embeddings to 3D for visualization
     print("Reducing embeddings for hybrid method to 3D")
     pca_3d = PCA(n_components=3)
@@ -105,7 +153,7 @@ if __name__ == '__main__':
     subset_user_ids = df['userId'].unique()[:len(reduced_user_data_hybrid_3d)]
     subset_movie_ids = df['movieId'].unique()[:len(reduced_movie_data_hybrid_3d)]
 
-    random_user_indices = np.random.choice(user_embeddings_hybrid.shape[0], 100, replace=False) 
+    random_user_indices = np.random.choice(user_embeddings_hybrid.shape[0], 100, replace=False)
     subset_user_ids = df['userId'].unique()[random_user_indices]
     
     # 3D Scatter Plot for User Clusters (Hybrid Method)
