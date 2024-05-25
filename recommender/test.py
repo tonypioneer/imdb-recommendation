@@ -6,6 +6,7 @@ import random
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
+from sklearn.neighbors import NearestNeighbors
 
 # Load data
 ratings = pd.read_csv('./data/input/ratings.csv')
@@ -197,3 +198,52 @@ def visualize_clusters(model):
 visualize_clusters(svd_sgd)
 visualize_clusters(svd_sgld)
 visualize_clusters(svd_sghmc)
+
+class HybridRecommender:
+    def __init__(self, svd_model, k=10):
+        self.svd_model = svd_model
+        self.k = k
+
+    def fit(self, train_data):
+        self.svd_model.fit(train_data)
+        self.movie_factors = self.svd_model.item_factors
+
+    def recommend(self, user, movie_ids):
+        knn = NearestNeighbors(n_neighbors=self.k, metric='cosine')
+        knn.fit(self.movie_factors)
+        movie_indices = [self.svd_model.item_map.get(movie_id) for movie_id in movie_ids if movie_id in self.svd_model.item_map]
+        if not movie_indices:
+            return []
+        distances, knn_indices = knn.kneighbors(self.movie_factors[movie_indices], n_neighbors=self.k)
+        recommendations = []
+        for i in range(len(movie_indices)):
+            svd_scores = [self.svd_model.predict(user, list(self.svd_model.item_map.keys())[idx]) for idx in knn_indices[i]]
+            recommendations.extend(zip([list(self.svd_model.item_map.keys())[idx] for idx in knn_indices[i]], svd_scores))
+        recommendations = sorted(recommendations, key=lambda x: x[1], reverse=True)[:10]  # Take top 10 recommendations
+        return recommendations
+
+# Use the HybridRecommender with the SGD optimizer to make recommendations and visualize the result
+hybrid_recommender = HybridRecommender(svd_sgd)
+hybrid_recommender.fit(train_data)
+
+# Example recommendation for a user (e.g., user with ID 1)
+user_id = 1
+movie_ids = test_data['movieId'].unique()[:100]  # Use a subset of movie IDs for demonstration
+recommendations = hybrid_recommender.recommend(user_id, movie_ids)
+
+print("Top 10 movie recommendations for user ID 1:")
+for movie_id, score in recommendations[:10]:
+    print(f"Movie ID: {movie_id}, Predicted Rating: {score}")
+
+# Visualize the recommendations
+def visualize_recommendations(recommendations):
+    movie_ids, scores = zip(*recommendations)
+    plt.figure(figsize=(10, 6))
+    plt.bar(range(len(movie_ids)), scores, alpha=0.7)
+    plt.xticks(range(len(movie_ids)), movie_ids)
+    plt.xlabel('Movie ID')
+    plt.ylabel('Predicted Rating')
+    plt.title('Top 10 Movie Recommendations')
+    plt.show()
+
+visualize_recommendations(recommendations)

@@ -81,7 +81,13 @@ class HybridRecommender:
     def recommend(self, user, movie_ids):
         knn = NearestNeighbors(n_neighbors=self.k, metric='cosine')
         knn.fit(self.movie_factors)
-        distances, indices = knn.kneighbors([self.movie_factors[movie_ids]], n_neighbors=self.k)
-        svd_scores = [self.svd_model.predict(user, movie_id) for movie_id in movie_ids[indices.flatten()]]
-        recommendations = sorted(zip(movie_ids[indices.flatten()], svd_scores), key=lambda x: x[1], reverse=True)
+        movie_indices = [self.svd_model.item_map.get(movie_id) for movie_id in movie_ids if movie_id in self.svd_model.item_map]
+        if not movie_indices:
+            return []
+        distances, knn_indices = knn.kneighbors(self.movie_factors[movie_indices], n_neighbors=self.k)
+        recommendations = []
+        for i in range(len(movie_indices)):
+            svd_scores = [self.svd_model.predict(user, list(self.svd_model.item_map.keys())[idx]) for idx in knn_indices[i]]
+            recommendations.extend(zip([list(self.svd_model.item_map.keys())[idx] for idx in knn_indices[i]], svd_scores))
+        recommendations = sorted(recommendations, key=lambda x: x[1], reverse=True)[:10]  # Take top 10 recommendations
         return recommendations
