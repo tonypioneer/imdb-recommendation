@@ -26,7 +26,7 @@ for user in usrid:
 
 print('data all', len(data_all))
 
-result = pd.read_csv('../references/result.csv')
+result = pd.read_csv('../data/output/result.csv')
 print('pred', len(result['userId']))
 posi = 0
 neg = 0

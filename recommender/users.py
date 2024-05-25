@@ -10,6 +10,7 @@ from surprise import KNNBaseline
 from surprise import KNNWithMeans
 from surprise import KNNBasic
 import csv
+from constants import DATA_PATHS
 
 
 class user_knn:
@@ -18,7 +19,10 @@ class user_knn:
         self.reader = Reader()
         self.ratings = pd.read_csv('data/output/train.csv')
         self.testings = pd.read_csv('data/output/test.csv')
-        data = Dataset.load_from_df(self.ratings[['userId', 'movieId', 'rating']], self.reader)
+        data = Dataset.load_from_df(
+            self.ratings[['userId', 'movieId', 'rating']],
+            self.reader
+        )
         trainset = data.build_full_trainset()
         sim_options = {'name': 'pearson_baseline', 'user_based': True}
         if mode == 0:
@@ -38,7 +42,8 @@ class user_knn:
     def get_similar_users(self, usrID, num=10):
         user_inner_id = self.algo.trainset.to_inner_uid(usrID)
         user_neighbors = self.algo.get_neighbors(user_inner_id, k=num)
-        user_neighbors = [self.algo.trainset.to_raw_uid(inner_id) for inner_id in user_neighbors]
+        user_neighbors = [self.algo.trainset.to_raw_uid(inner_id)
+                          for inner_id in user_neighbors]
         # print(user_neighbors)
         return user_neighbors
 
@@ -49,7 +54,9 @@ class user_knn:
             print(list(self.ratings[self.ratings.userId == i]['movieId']))
 
     def recommend(self, usrID, num=5):
-        existed_movie = list(self.ratings[self.ratings.userId==usrID]['movieId'])
+        existed_movie = list(
+            self.ratings[self.ratings.userId == usrID]['movieId']
+        )
         similar_users = self.get_similar_users(usrID, num)
         movies_dict = {}
         for i in similar_users:
@@ -60,26 +67,30 @@ class user_knn:
                     if movie[j] in movies_dict.keys():
                         movies_dict[movie[j]] += vote[j]
                     else:
-                        movies_dict[movie[j]] = vote[j]   # 从最相似的用户中挑选出没看过的电影，评分相加
-        result = sorted(movies_dict.items(), key=lambda x: x[1], reverse=True)  # 对评分进行排序
-        result = result[:num]  # 挑选出最高评分的10部电影
+
+                        # Select movies that have not been watched from the
+                        # most similar users, and add the ratings
+                        movies_dict[movie[j]] = vote[j]
+        # Sort by rating
+        result = sorted(movies_dict.items(), key=lambda x: x[1], reverse=True)
+        result = result[:num]  # Pick the top <num> movies
         # print(result)
         recommending = []
         recommending_id = []
         for i in result:
-            recommending.append(self.index[self.index.movieId==i[0]]['title'])
+            recommending.append(self.index[self.index.movieId == i[0]]['title'])
             recommending_id.append(i[0])
-        return recommending, recommending_id  # 返回推荐的电影名字和id
+        return recommending, recommending_id  # Return the movie name and ID
 
-    def test(self, num = 10):
+    def test(self, num=10):
         result = []
         for user in self.userid:
             _, ids = self.recommend(user, num)
             # print(ids)
             result.append(ids)
 
-        with open("result.csv", "w") as csvfile:
+        with open(DATA_PATHS.RESULT_DATASET, "w") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['userId', 'result'])
-            for i,row in enumerate(result):
+            for i, row in enumerate(result):
                 writer.writerow([self.userid[i], row])
