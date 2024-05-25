@@ -185,7 +185,7 @@ svd_sghmc.fit(train_data)
 rmse_sghmc = evaluate_model(svd_sghmc, test_data)
 print(f'RMSE for SVD with SGHMC: {rmse_sghmc}')
 
-def visualize_clusters(model):
+def visualise_clusters(model):
     pca = PCA(n_components=2)
     movie_factors_2d = pca.fit_transform(model.item_factors)
     plt.scatter(movie_factors_2d[:, 0], movie_factors_2d[:, 1], alpha=0.5)
@@ -194,10 +194,10 @@ def visualize_clusters(model):
     plt.ylabel('PCA Component 2')
     plt.show()
 
-# Visualize clusters for each method
-visualize_clusters(svd_sgd)
-visualize_clusters(svd_sgld)
-visualize_clusters(svd_sghmc)
+# visualise clusters for each method
+visualise_clusters(svd_sgd)
+visualise_clusters(svd_sgld)
+visualise_clusters(svd_sghmc)
 
 class HybridRecommender:
     def __init__(self, svd_model, k=10):
@@ -222,7 +222,7 @@ class HybridRecommender:
         recommendations = sorted(recommendations, key=lambda x: x[1], reverse=True)[:10]  # Take top 10 recommendations
         return recommendations
 
-# Use the HybridRecommender with the SGD optimizer to make recommendations and visualize the result
+# Use the HybridRecommender with the SGD optimiser to make recommendations and visualise the result
 hybrid_recommender = HybridRecommender(svd_sgd)
 hybrid_recommender.fit(train_data)
 
@@ -235,8 +235,8 @@ print("Top 10 movie recommendations for user ID 1:")
 for movie_id, score in recommendations[:10]:
     print(f"Movie ID: {movie_id}, Predicted Rating: {score}")
 
-# Visualize the recommendations
-def visualize_recommendations(recommendations):
+# visualise the recommendations
+def visualise_recommendations(recommendations):
     movie_ids, scores = zip(*recommendations)
     plt.figure(figsize=(10, 6))
     plt.bar(range(len(movie_ids)), scores, alpha=0.7)
@@ -246,4 +246,4 @@ def visualize_recommendations(recommendations):
     plt.title('Top 10 Movie Recommendations')
     plt.show()
 
-visualize_recommendations(recommendations)
+visualise_recommendations(recommendations)

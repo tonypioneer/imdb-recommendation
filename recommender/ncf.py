@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras import models
 from tensorflow.keras.layers import Embedding, Input, Flatten, Dense, Concatenate
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimisers import Adam
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
@@ -37,7 +37,7 @@ def NCF_model(n_users, n_items, embedding_size=50):
     output = Dense(1)(dense)
     
     model = models.Model([user_input, item_input], output)
-    model.compile(optimizer=Adam(), loss='mean_squared_error')
+    model.compile(optimiser=Adam(), loss='mean_squared_error')
     
     return model
 
