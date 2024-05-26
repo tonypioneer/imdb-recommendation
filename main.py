@@ -85,53 +85,53 @@ if __name__ == '__main__':
     avg_ratings = df_rating.groupby('movieId')['rating'].mean()
     avg_ratings_array = np.array([avg_ratings.get(mid, 0) for mid in df_movie['movieId']])
 
-    inertia = []
-    K_range = range(10, 150, 10)
-    for K in K_range:
-        kmeans = KMeans(n_clusters=K, random_state=0).fit(user_embeddings_hybrid)
-        inertia.append(kmeans.inertia_) # Plot the elbow graph
-    plt.figure(figsize=(8, 6))
-    plt.plot(K_range, inertia, 'bo-')
-    plt.xlabel('Number of clusters (K)')
-    plt.ylabel('Inertia')
-    plt.title('Elbow Method For Optimal K (user_embeddings_hybrid)')
-    plt.show()
-
-    inertia = []
-    K_range = range(10, 150, 10)
-    for K in K_range:
-        kmeans = KMeans(n_clusters=K, random_state=0).fit(movie_embeddings_hybrid)
-        inertia.append(kmeans.inertia_) # Plot the elbow graph
-    plt.figure(figsize=(8, 6))
-    plt.plot(K_range, inertia, 'bo-')
-    plt.xlabel('Number of clusters (K)')
-    plt.ylabel('Inertia')
-    plt.title('Elbow Method For Optimal K (movie_embeddings_hybrid)')
-    plt.show()
-
-    inertia = []
-    K_range = range(10, 150, 10)
-    for K in K_range:
-        kmeans = KMeans(n_clusters=K, random_state=0).fit(user_embeddings_knn)
-        inertia.append(kmeans.inertia_) # Plot the elbow graph
-    plt.figure(figsize=(8, 6))
-    plt.plot(K_range, inertia, 'bo-')
-    plt.xlabel('Number of clusters (K)')
-    plt.ylabel('Inertia')
-    plt.title('Elbow Method For Optimal K (user_embeddings_knn)')
-    plt.show()
-
-    inertia = []
-    K_range = range(10, 150, 10)
-    for K in K_range:
-        kmeans = KMeans(n_clusters=K, random_state=0).fit(movie_embeddings_knn)
-        inertia.append(kmeans.inertia_) # Plot the elbow graph
-    plt.figure(figsize=(8, 6))
-    plt.plot(K_range, inertia, 'bo-')
-    plt.xlabel('Number of clusters (K)')
-    plt.ylabel('Inertia')
-    plt.title('Elbow Method For Optimal K (movie_embeddings_knn)')
-    plt.show()
+    # inertia = []
+    # K_range = range(10, 150, 10)
+    # for K in K_range:
+    #     kmeans = KMeans(n_clusters=K, random_state=0).fit(user_embeddings_hybrid)
+    #     inertia.append(kmeans.inertia_) # Plot the elbow graph
+    # plt.figure(figsize=(8, 6))
+    # plt.plot(K_range, inertia, 'bo-')
+    # plt.xlabel('Number of clusters (K)')
+    # plt.ylabel('Inertia')
+    # plt.title('Elbow Method For Optimal K (user_embeddings_hybrid)')
+    # plt.show()
+    #
+    # inertia = []
+    # K_range = range(10, 150, 10)
+    # for K in K_range:
+    #     kmeans = KMeans(n_clusters=K, random_state=0).fit(movie_embeddings_hybrid)
+    #     inertia.append(kmeans.inertia_) # Plot the elbow graph
+    # plt.figure(figsize=(8, 6))
+    # plt.plot(K_range, inertia, 'bo-')
+    # plt.xlabel('Number of clusters (K)')
+    # plt.ylabel('Inertia')
+    # plt.title('Elbow Method For Optimal K (movie_embeddings_hybrid)')
+    # plt.show()
+    #
+    # inertia = []
+    # K_range = range(10, 150, 10)
+    # for K in K_range:
+    #     kmeans = KMeans(n_clusters=K, random_state=0).fit(user_embeddings_knn)
+    #     inertia.append(kmeans.inertia_) # Plot the elbow graph
+    # plt.figure(figsize=(8, 6))
+    # plt.plot(K_range, inertia, 'bo-')
+    # plt.xlabel('Number of clusters (K)')
+    # plt.ylabel('Inertia')
+    # plt.title('Elbow Method For Optimal K (user_embeddings_knn)')
+    # plt.show()
+    #
+    # inertia = []
+    # K_range = range(10, 150, 10)
+    # for K in K_range:
+    #     kmeans = KMeans(n_clusters=K, random_state=0).fit(movie_embeddings_knn)
+    #     inertia.append(kmeans.inertia_) # Plot the elbow graph
+    # plt.figure(figsize=(8, 6))
+    # plt.plot(K_range, inertia, 'bo-')
+    # plt.xlabel('Number of clusters (K)')
+    # plt.ylabel('Inertia')
+    # plt.title('Elbow Method For Optimal K (movie_embeddings_knn)')
+    # plt.show()
 
     # Reduce embeddings to 3D for visualization
     print("Reducing embeddings for hybrid method to 3D")
