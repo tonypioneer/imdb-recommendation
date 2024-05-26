@@ -52,6 +52,15 @@ class movie_svd:
             movie_inner_id = self.svd.trainset.to_inner_iid(movie_id)
             movie_embeddings[movie_id] = self.svd.qi[movie_inner_id]
         return movie_embeddings
+
+    def get_user_embeddings_svd(self):
+        # Get the number of users and factors
+        num_users = len(df_rating['userId'].unique())
+        user_embeddings = np.zeros((num_users, self.n_factors))
+        for user_id in range(num_users):
+            user_inner_id = self.svd.trainset.to_inner_uid(user_id)
+            user_embeddings[user_id] = self.svd.pu[user_inner_id]
+        return user_embeddings
     
 if __name__ == '__main__':
 
