@@ -317,8 +317,9 @@ if __name__ == '__main__':
         if len(movie_index) > 0 and movie_index[0] < len(reduced_movie_data_knn_2d):
             ax.scatter(reduced_movie_data_knn_2d[movie_index[0], 0], reduced_movie_data_knn_2d[movie_index[0], 1], marker='^', label='Viewer Top 10')
 
-    for movie_id in recommended_movies[1]:
-        movie_index = np.where(df_movie['movieId'].values == movie_id)[0]
+    for movie_id in recommended_movies[0]:
+        movie_id_index = movie_id.index
+        movie_index = np.where(df_movie['movieId'].values == movie_id_index)[0]
         if len(movie_index) > 0 and movie_index[0] < len(reduced_movie_data_knn_2d):
             ax.scatter(reduced_movie_data_knn_2d[movie_index[0], 0], reduced_movie_data_knn_2d[movie_index[0], 1], marker='s', label='Top 10 Recommendations')
 
