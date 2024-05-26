@@ -230,7 +230,7 @@ if __name__ == '__main__':
     scatter = ax.scatter(reduced_movie_data_titles_svd[:, 0], reduced_movie_data_titles_svd[:, 1], alpha=0.6, c=avg_ratings_array[:30], cmap='viridis')
     plt.colorbar(scatter, label='Average Rating')
     for i, title in enumerate(movie_titles):
-        ax.text(reduced_movie_data_titles_svd[i, 0], reduced_movie_data_titles_svd[i, 1], title, fontsize=9)
+        ax.text(reduced_movie_data_titles_svd[i, 0], reduced_movie_data_titles_svd[i, 1], title, fontsize=6)
     ax.set_title('Movie Titles in 2D PCA Space (SVD)')
     ax.set_xlabel('Component 1')
     ax.set_ylabel('Component 2')
@@ -269,7 +269,7 @@ if __name__ == '__main__':
     scatter = ax.scatter(reduced_movie_data_titles_ncf[:, 0], reduced_movie_data_titles_ncf[:, 1], alpha=0.6, c=avg_ratings_array[:30], cmap='viridis')
     plt.colorbar(scatter, label='Average Rating')
     for i, title in enumerate(movie_titles):
-        ax.text(reduced_movie_data_titles_ncf[i, 0], reduced_movie_data_titles_ncf[i, 1], title, fontsize=9)
+        ax.text(reduced_movie_data_titles_ncf[i, 0], reduced_movie_data_titles_ncf[i, 1], title, fontsize=6)
     ax.set_title('Movie Titles in 2D PCA Space (NCF)')
     ax.set_xlabel('Component 1')
     ax.set_ylabel('Component 2')
