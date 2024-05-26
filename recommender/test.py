@@ -10,7 +10,7 @@ from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
 
 # Load data
-ratings = pd.read_csv('./data/input/ratings.csv')
+ratings = pd.read_csv('../data/input/ratings.csv')
 usrid = []
 movieid = []
 for i in range(len(ratings['userId'])):
@@ -41,7 +41,7 @@ for user in usrid:
 
 threshold = 0.85
 test_data = []
-with open("./data/output/train.csv", "w") as csvfile:
+with open("../data/output/train.csv", "w") as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(['userId', 'movieId', 'rating'])
     for this_user in data_all:
@@ -53,14 +53,14 @@ with open("./data/output/train.csv", "w") as csvfile:
             else:
                 test_data.append(this_user[i])
 
-with open("./data/output/test.csv", "w") as csvfile:
+with open("../data/output/test.csv", "w") as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(['userId', 'movieId', 'rating'])
     for row in test_data:
         writer.writerow(row)
 
-train_data = pd.read_csv("./data/output/train.csv")
-test_data = pd.read_csv("./data/output/test.csv")
+train_data = pd.read_csv("../data/output/train.csv")
+test_data = pd.read_csv("../data/output/test.csv")
 
 class SVD_SGD:
     def __init__(self, n_factors, lr, reg, n_epochs):
