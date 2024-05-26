@@ -66,9 +66,6 @@ The hardware configuration is as follows:
 │   ├── svd.py
 │   ├── test.py
 │   └── users.py
-├── references
-│   └── __pycache__
-│       └── optimizer.cpython-311.pyc
 └── utils
     ├── __pycache__
     │   ├── dataset.cpython-311.pyc
