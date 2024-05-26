@@ -5,7 +5,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Embedding, Input, Flatten, Dense, Concatenate
 from tensorflow.keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # Load data
 ratings = pd.read_csv('./data/input/ratings.csv')
@@ -65,4 +65,6 @@ history = model.fit([train_data['userId'], train_data['movieId'], train_data['ho
 # Evaluate the context-aware model
 predictions = model.predict([test_data['userId'], test_data['movieId'], test_data['hour'], test_data['day_of_week']])
 rmse = np.sqrt(mean_squared_error(test_data['rating'], predictions))
+mae = mean_absolute_error(test_data['rating'], predictions)
 print(f'RMSE for context-aware NCF: {rmse}')
+print(f'MAE for context-aware NCF: {mae}')

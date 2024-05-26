@@ -66,8 +66,8 @@ The hardware configuration is as follows:
 The experimental setup involves several machine learning algorithms and techniques to build and evaluate a movie recommendation system.
 
 - In `main.py`, the integration of K-Nearest Neighbors (KNN) and Singular Value Decomposition (SVD) is tested for hybrid recommendations. The user and movie embeddings are reduced to 2D and 3D spaces using PCA and visualized with scatter plots to illustrate clustering behavior. K-means clustering is applied to identify user and movie clusters.
-- The `test.py` script focuses on evaluating the recommendation system by calculating Root Mean Square Error (RMSE) to assess prediction accuracy.
-- The `ncf.py` file implements Neural Collaborative Filtering (NCF), which leverages neural networks to capture complex user-item interactions. This model is also evaluated for RMSE.
+- The `svd.py` script focuses on evaluating the recommendation system by calculating RMSE and MAE to assess prediction accuracy.
+- The `ncf.py` file implements Neural Collaborative Filtering (NCF), which leverages neural networks to capture complex user-item interactions. This model is also evaluated for RMSE and MAE.
 - `contextual.py` integrates contextual information into the recommendation process, refining the recommendation quality.
 - The `knn.py` script handles the KNN algorithm for both user-based and item-based collaborative filtering.
 - The `optimiser.py` script focuses on optimizing the recommendation models for better performance.
