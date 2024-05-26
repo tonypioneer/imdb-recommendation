@@ -356,27 +356,27 @@ if __name__ == '__main__':
 
 
     # Plotting predicted user ids in user feature space
-    print("Plotting predicted user IDs in user feature space")
-    fig, ax = plt.subplots(figsize=(10, 7))
-    active_user_id = test_hybrid.userid[0]
-    user_ids = df_test['userId'].unique().tolist()
+    # print("Plotting predicted user IDs in user feature space")
+    # fig, ax = plt.subplots(figsize=(10, 7))
+    # active_user_id = test_hybrid.userid[0]
+    # user_ids = df_test['userId'].unique().tolist()
 
-    # Assuming user_embeddings_knn contains the KNN embeddings for all users
-    reduced_user_data_knn_2d = pca_2d.fit_transform(user_embeddings_knn)
+    # # Assuming user_embeddings_knn contains the KNN embeddings for all users
+    # reduced_user_data_knn_2d = pca_2d.fit_transform(user_embeddings_knn)
     
-    for user_id in user_ids:
-        user_index = np.where(df['userId'].values == user_id)[0]
-        if user_id == active_user_id:
-            ax.scatter(reduced_user_data_knn_2d[user_index, 0], reduced_user_data_knn_2d[user_index, 1], marker='^', s=100, label='Active User')
-        elif user_id in test_hybrid.userid:
-            ax.scatter(reduced_user_data_knn_2d[user_index, 0], reduced_user_data_knn_2d[user_index, 1], marker='s', label='Close User')
-        else:
-            ax.scatter(reduced_user_data_knn_2d[user_index, 0], reduced_user_data_knn_2d[user_index, 1], marker='o', label='Far User')
+    # for user_id in user_ids:
+    #     user_index = np.where(df['userId'].values == user_id)[0]
+    #     if user_id == active_user_id:
+    #         ax.scatter(reduced_user_data_knn_2d[user_index, 0], reduced_user_data_knn_2d[user_index, 1], marker='^', s=100, label='Active User')
+    #     elif user_id in test_hybrid.userid:
+    #         ax.scatter(reduced_user_data_knn_2d[user_index, 0], reduced_user_data_knn_2d[user_index, 1], marker='s', label='Close User')
+    #     else:
+    #         ax.scatter(reduced_user_data_knn_2d[user_index, 0], reduced_user_data_knn_2d[user_index, 1], marker='o', label='Far User')
 
-    ax.set_title('User Feature Space')
-    ax.set_xlabel('PCA 1')
-    ax.set_ylabel('PCA 2')
-    handles, labels = ax.get_legend_handles_labels()
-    unique_labels = dict(zip(labels, handles))  # Remove duplicate labels
-    ax.legend(unique_labels.values(), unique_labels.keys(), loc='best', bbox_to_anchor=(1, 1))
-    plt.show()
+    # ax.set_title('User Feature Space')
+    # ax.set_xlabel('PCA 1')
+    # ax.set_ylabel('PCA 2')
+    # handles, labels = ax.get_legend_handles_labels()
+    # unique_labels = dict(zip(labels, handles))  # Remove duplicate labels
+    # ax.legend(unique_labels.values(), unique_labels.keys(), loc='best', bbox_to_anchor=(1, 1))
+    # plt.show()
