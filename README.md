@@ -48,7 +48,6 @@ The hardware configuration is as follows:
 │       └── train.csv
 ├── main.py
 ├── recommender
-│   ├── calculate.py
 │   ├── contextual.py
 │   ├── knn.py
 │   ├── movies.py
@@ -71,7 +70,6 @@ The experimental setup involves several machine learning algorithms and techniqu
 - The `ncf.py` file implements Neural Collaborative Filtering (NCF), which leverages neural networks to capture complex user-item interactions. This model is also evaluated for RMSE.
 - `contextual.py` integrates contextual information into the recommendation process, refining the recommendation quality.
 - The `knn.py` script handles the KNN algorithm for both user-based and item-based collaborative filtering.
-- The `calculate.py` script includes additional calculations and utility functions used across different modules.
 - The `optimiser.py` script focuses on optimizing the recommendation models for better performance.
 - The `svd.py` script implements the pure SVD algorithm for generating recommendations.
 - The `users.py` and `movies.py` files define the classes for user and movie KNN recommenders, respectively, and are responsible for computing similarity metrics and generating recommendations.
