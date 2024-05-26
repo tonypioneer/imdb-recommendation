@@ -109,53 +109,53 @@ if __name__ == '__main__':
     avg_ratings = df_rating.groupby('movieId')['rating'].mean()
     avg_ratings_array = np.array([avg_ratings.get(mid, 0) for mid in df_movie['movieId']])
 
-    inertia = []
-    K_range = range(10, 150, 10)
-    for K in K_range:
-        kmeans = KMeans(n_clusters=K, random_state=0).fit(user_embeddings_hybrid)
-        inertia.append(kmeans.inertia_) # Plot the elbow graph
-    plt.figure(figsize=(8, 6))
-    plt.plot(K_range, inertia, 'bo-')
-    plt.xlabel('Number of clusters (K)')
-    plt.ylabel('Inertia')
-    plt.title('Elbow Method For Optimal K (user_embeddings_hybrid)')
-    plt.show()
-
-    inertia = []
-    K_range = range(10, 150, 10)
-    for K in K_range:
-        kmeans = KMeans(n_clusters=K, random_state=0).fit(movie_embeddings_hybrid)
-        inertia.append(kmeans.inertia_) # Plot the elbow graph
-    plt.figure(figsize=(8, 6))
-    plt.plot(K_range, inertia, 'bo-')
-    plt.xlabel('Number of clusters (K)')
-    plt.ylabel('Inertia')
-    plt.title('Elbow Method For Optimal K (movie_embeddings_hybrid)')
-    plt.show()
-
-    inertia = []
-    K_range = range(10, 150, 10)
-    for K in K_range:
-        kmeans = KMeans(n_clusters=K, random_state=0).fit(user_embeddings_knn)
-        inertia.append(kmeans.inertia_) # Plot the elbow graph
-    plt.figure(figsize=(8, 6))
-    plt.plot(K_range, inertia, 'bo-')
-    plt.xlabel('Number of clusters (K)')
-    plt.ylabel('Inertia')
-    plt.title('Elbow Method For Optimal K (user_embeddings_knn)')
-    plt.show()
-
-    inertia = []
-    K_range = range(10, 150, 10)
-    for K in K_range:
-        kmeans = KMeans(n_clusters=K, random_state=0).fit(movie_embeddings_knn)
-        inertia.append(kmeans.inertia_) # Plot the elbow graph
-    plt.figure(figsize=(8, 6))
-    plt.plot(K_range, inertia, 'bo-')
-    plt.xlabel('Number of clusters (K)')
-    plt.ylabel('Inertia')
-    plt.title('Elbow Method For Optimal K (movie_embeddings_knn)')
-    plt.show()
+    # inertia = []
+    # K_range = range(10, 150, 10)
+    # for K in K_range:
+    #     kmeans = KMeans(n_clusters=K, random_state=0).fit(user_embeddings_hybrid)
+    #     inertia.append(kmeans.inertia_) # Plot the elbow graph
+    # plt.figure(figsize=(8, 6))
+    # plt.plot(K_range, inertia, 'bo-')
+    # plt.xlabel('Number of clusters (K)')
+    # plt.ylabel('Inertia')
+    # plt.title('Elbow Method For Optimal K (user_embeddings_hybrid)')
+    # plt.show()
+    #
+    # inertia = []
+    # K_range = range(10, 150, 10)
+    # for K in K_range:
+    #     kmeans = KMeans(n_clusters=K, random_state=0).fit(movie_embeddings_hybrid)
+    #     inertia.append(kmeans.inertia_) # Plot the elbow graph
+    # plt.figure(figsize=(8, 6))
+    # plt.plot(K_range, inertia, 'bo-')
+    # plt.xlabel('Number of clusters (K)')
+    # plt.ylabel('Inertia')
+    # plt.title('Elbow Method For Optimal K (movie_embeddings_hybrid)')
+    # plt.show()
+    #
+    # inertia = []
+    # K_range = range(10, 150, 10)
+    # for K in K_range:
+    #     kmeans = KMeans(n_clusters=K, random_state=0).fit(user_embeddings_knn)
+    #     inertia.append(kmeans.inertia_) # Plot the elbow graph
+    # plt.figure(figsize=(8, 6))
+    # plt.plot(K_range, inertia, 'bo-')
+    # plt.xlabel('Number of clusters (K)')
+    # plt.ylabel('Inertia')
+    # plt.title('Elbow Method For Optimal K (user_embeddings_knn)')
+    # plt.show()
+    #
+    # inertia = []
+    # K_range = range(10, 150, 10)
+    # for K in K_range:
+    #     kmeans = KMeans(n_clusters=K, random_state=0).fit(movie_embeddings_knn)
+    #     inertia.append(kmeans.inertia_) # Plot the elbow graph
+    # plt.figure(figsize=(8, 6))
+    # plt.plot(K_range, inertia, 'bo-')
+    # plt.xlabel('Number of clusters (K)')
+    # plt.ylabel('Inertia')
+    # plt.title('Elbow Method For Optimal K (movie_embeddings_knn)')
+    # plt.show()
 
     # Reduce embeddings to 3D for visualization
     print("Reducing embeddings for hybrid method to 3D")
@@ -389,16 +389,38 @@ if __name__ == '__main__':
     recommended_movies = test_hybrid.movie.recommend(viewer_id, top_10_movies)[:10]
 
     fig, ax = plt.subplots(figsize=(10, 7))
+    viewer_legend_added = False
+    recommended_legend_added = False
+
     for movie_id in top_10_movies:
         movie_index = np.where(df_movie['movieId'].values == movie_id)[0]
-        if len(movie_index) > 0 and movie_index[0] < len(reduced_movie_data_knn_2d):
-            ax.scatter(reduced_movie_data_knn_2d[movie_index[0], 0], reduced_movie_data_knn_2d[movie_index[0], 1], marker='^', label='Favourite movies')
+        if len(movie_index) > 0 and movie_index[0] < len(
+                reduced_movie_data_knn_2d):
+            if not viewer_legend_added:
+                ax.scatter(reduced_movie_data_knn_2d[movie_index[0], 0],
+                           reduced_movie_data_knn_2d[movie_index[0], 1],
+                           marker='^', color='blue', label='Favourite Movies')
+                viewer_legend_added = True
+            else:
+                ax.scatter(reduced_movie_data_knn_2d[movie_index[0], 0],
+                           reduced_movie_data_knn_2d[movie_index[0], 1],
+                           marker='^', color='blue')
 
     for movie_id in recommended_movies[0]:
         movie_id_index = movie_id.index[0]
         movie_index = np.where(df_movie['movieId'].values == movie_id_index)[0]
-        if len(movie_index) > 0 and movie_index[0] < len(reduced_movie_data_knn_2d):
-            ax.scatter(reduced_movie_data_knn_2d[movie_index[0], 0], reduced_movie_data_knn_2d[movie_index[0], 1], marker='s', label='Recommended movies')
+        if len(movie_index) > 0 and movie_index[0] < len(
+                reduced_movie_data_knn_2d):
+            if not recommended_legend_added:
+                ax.scatter(reduced_movie_data_knn_2d[movie_index[0], 0],
+                           reduced_movie_data_knn_2d[movie_index[0], 1],
+                           marker='s', color='red',
+                           label='Recommended Movies')
+                recommended_legend_added = True
+            else:
+                ax.scatter(reduced_movie_data_knn_2d[movie_index[0], 0],
+                           reduced_movie_data_knn_2d[movie_index[0], 1],
+                           marker='s', color='red')
 
     ax.set_title("Viewer's Favourite Movies and Recommendations")
     ax.set_xlabel('PCA 1')
