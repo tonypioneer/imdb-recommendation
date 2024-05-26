@@ -251,44 +251,62 @@ if __name__ == '__main__':
     # Split data into train and test sets
     train_data, test_data = train_test_split(ratings, test_size=0.2, random_state=42)
 
-    model = NCF_model(n_users, n_items)
-    model.summary()
+    # model = NCF_model(n_users, n_items)
+    # model.summary()
 
-    # Train the model
-    history = model.fit([train_data['userId'], train_data['movieId']], train_data['rating'], 
-                        epochs=5, batch_size=64, 
-                        validation_data=([test_data['userId'], test_data['movieId']], test_data['rating']))
+    # # Train the model
+    # history = model.fit([train_data['userId'], train_data['movieId']], train_data['rating'], 
+    #                     epochs=5, batch_size=64, 
+    #                     validation_data=([test_data['userId'], test_data['movieId']], test_data['rating']))
 
-    # Extract movie embeddings from the trained NCF model
-    movie_embeddings_ncf = model.get_layer('embedding_1').get_weights()[0]
+    # # Extract movie embeddings from the trained NCF model
+    # movie_embeddings_ncf = model.get_layer('embedding_1').get_weights()[0]
 
-    movie_titles = df_movie['title'].unique()[:30]  # Limit to 30 movie titles
-    reduced_movie_data_titles_ncf = PCA(n_components=2).fit_transform(movie_embeddings_ncf[:30])  # Plot only the first 30 movies
+    # movie_titles = df_movie['title'].unique()[:30]  # Limit to 30 movie titles
+    # reduced_movie_data_titles_ncf = PCA(n_components=2).fit_transform(movie_embeddings_ncf[:30])  # Plot only the first 30 movies
 
-    fig, ax = plt.subplots(figsize=(12, 8))
-    scatter = ax.scatter(reduced_movie_data_titles_ncf[:, 0], reduced_movie_data_titles_ncf[:, 1], alpha=0.6, c=avg_ratings_array[:30], cmap='viridis')
-    plt.colorbar(scatter, label='Average Rating')
-    for i, title in enumerate(movie_titles):
-        ax.text(reduced_movie_data_titles_ncf[i, 0], reduced_movie_data_titles_ncf[i, 1], title, fontsize=6)
-    ax.set_title('Movie Titles in 2D PCA Space (NCF)')
-    ax.set_xlabel('Component 1')
-    ax.set_ylabel('Component 2')
-    plt.show()
+    # fig, ax = plt.subplots(figsize=(12, 8))
+    # scatter = ax.scatter(reduced_movie_data_titles_ncf[:, 0], reduced_movie_data_titles_ncf[:, 1], alpha=0.6, c=avg_ratings_array[:30], cmap='viridis')
+    # plt.colorbar(scatter, label='Average Rating')
+    # for i, title in enumerate(movie_titles):
+    #     ax.text(reduced_movie_data_titles_ncf[i, 0], reduced_movie_data_titles_ncf[i, 1], title, fontsize=6)
+    # ax.set_title('Movie Titles in 2D PCA Space (NCF)')
+    # ax.set_xlabel('Component 1')
+    # ax.set_ylabel('Component 2')
+    # plt.show()
 
     # Additional Plots
 
-    # Plotting different viewers on user feature space
-    print("Plotting different viewers on user feature space")
+    # Plotting predicted user ids in user feature space
+    print("Plotting predicted user IDs in user feature space")
     fig, ax = plt.subplots(figsize=(10, 7))
-    for user_id in test_hybrid.userid:
-        user_index = np.where(df_test['userId'].values == user_id)[0][0]
-        if user_index < len(reduced_user_data_hybrid_2d):
-            ax.scatter(reduced_user_data_hybrid_2d[user_index, 0], reduced_user_data_hybrid_2d[user_index, 1], label=f'User {user_id}')
-    ax.set_title('Different Viewers on User Feature Space')
+    active_user_id = test_hybrid.userid[0]
+    user_ids = df_test['userId'].unique().tolist()
+
+    # Assuming user_embeddings_knn contains the KNN embeddings for all users
+    reduced_user_data_knn_2d = pca_2d.fit_transform(user_embeddings_knn)
+
+    for user_id in user_ids:
+        try:
+            user_index = np.where(df['userId'].values == user_id)[0][0]
+            if user_id == active_user_id:
+                ax.scatter(reduced_user_data_knn_2d[user_index, 0], reduced_user_data_knn_2d[user_index, 1], marker='^', s=100, label='Active User')
+                ax.text(reduced_user_data_knn_2d[user_index, 0], reduced_user_data_knn_2d[user_index, 1], f'User {user_id}', fontsize=9)
+            elif user_id in test_hybrid.userid:
+                ax.scatter(reduced_user_data_knn_2d[user_index, 0], reduced_user_data_knn_2d[user_index, 1], marker='s', label='Close User')
+            else:
+                ax.scatter(reduced_user_data_knn_2d[user_index, 0], reduced_user_data_knn_2d[user_index, 1], marker='o', label='Far User')
+        except IndexError:
+            continue  # Skip any user_id that results in an out-of-bounds index
+
+    ax.set_title('User Feature Space')
     ax.set_xlabel('PCA 1')
     ax.set_ylabel('PCA 2')
-    ax.legend()
+    handles, labels = ax.get_legend_handles_labels()
+    unique_labels = dict(zip(labels, handles))  # Remove duplicate labels
+    ax.legend(unique_labels.values(), unique_labels.keys(), loc='best', bbox_to_anchor=(1, 1))
     plt.show()
+
 
     # Plotting different viewers' top 10 movies on movie feature space
     print("Plotting different viewers' top 10 movies on movie feature space")
@@ -334,4 +352,31 @@ if __name__ == '__main__':
     ax.set_xlabel('PCA 1')
     ax.set_ylabel('PCA 2')
     ax.legend()
+    plt.show()
+
+
+    # Plotting predicted user ids in user feature space
+    print("Plotting predicted user IDs in user feature space")
+    fig, ax = plt.subplots(figsize=(10, 7))
+    active_user_id = test_hybrid.userid[0]
+    user_ids = df_test['userId'].unique().tolist()
+
+    # Assuming user_embeddings_knn contains the KNN embeddings for all users
+    reduced_user_data_knn_2d = pca_2d.fit_transform(user_embeddings_knn)
+    
+    for user_id in user_ids:
+        user_index = np.where(df['userId'].values == user_id)[0]
+        if user_id == active_user_id:
+            ax.scatter(reduced_user_data_knn_2d[user_index, 0], reduced_user_data_knn_2d[user_index, 1], marker='^', s=100, label='Active User')
+        elif user_id in test_hybrid.userid:
+            ax.scatter(reduced_user_data_knn_2d[user_index, 0], reduced_user_data_knn_2d[user_index, 1], marker='s', label='Close User')
+        else:
+            ax.scatter(reduced_user_data_knn_2d[user_index, 0], reduced_user_data_knn_2d[user_index, 1], marker='o', label='Far User')
+
+    ax.set_title('User Feature Space')
+    ax.set_xlabel('PCA 1')
+    ax.set_ylabel('PCA 2')
+    handles, labels = ax.get_legend_handles_labels()
+    unique_labels = dict(zip(labels, handles))  # Remove duplicate labels
+    ax.legend(unique_labels.values(), unique_labels.keys(), loc='best', bbox_to_anchor=(1, 1))
     plt.show()
