@@ -33,45 +33,34 @@ The hardware configuration is as follows:
 - GPU: Apple Silicon M1 Pro
 
 ## The File Structure
+```
 .
 ├── LICENSE
 ├── README.md
-├── __pycache__
-│   └── constants.cpython-311.pyc
 ├── constants.py
-
 ├── data
-│   ├── input
-│   │   ├── movies.csv
-│   │   └── ratings.csv
-│   └── output
-│       ├── result.csv
-│       ├── test.csv
-│       └── train.csv
-
+│   ├── input
+│   │   ├── movies.csv
+│   │   └── ratings.csv
+│   └── output
+│       ├── result.csv
+│       ├── test.csv
+│       └── train.csv
 ├── main.py
 ├── recommender
-│   ├── __pycache__
-│   │   ├── knn.cpython-311.pyc
-│   │   ├── movies.cpython-311.pyc
-│   │   ├── optimiser.cpython-311.pyc
-│   │   ├── svd.cpython-311.pyc
-│   │   └── users.cpython-311.pyc
-│   ├── calculate.py
-│   ├── contextual.py
-│   ├── knn.py
-│   ├── movies.py
-│   ├── ncf.py
-│   ├── optimiser.py
-│   ├── svd.py
-│   ├── test.py
-│   └── users.py
+│   ├── calculate.py
+│   ├── contextual.py
+│   ├── knn.py
+│   ├── movies.py
+│   ├── ncf.py
+│   ├── optimiser.py
+│   ├── svd.py
+│   ├── test.py
+│   └── users.py
 └── utils
-    ├── __pycache__
-    │   ├── dataset.cpython-311.pyc
-    │   └── load_data.cpython-311.pyc
     ├── dataset.py
     └── load_data.py
+```
 
 ## Experiment
 
