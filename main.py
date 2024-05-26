@@ -56,16 +56,6 @@ if __name__ == '__main__':
         rating = row['rating']
         rating_matrix[user_index, movie_index] = rating
 
-    # test = movie_recommender()
-    # test.recommend(2)
-    # test.test()
-
-    # test = knn_all()
-    # result = test.recommend(34, 480)
-    #
-    # for i in result:
-    #     print(i.values[0])
-
     print("Testing hybrid method (SVD + KNN)")
     test_hybrid = movie_recommender()
     test_hybrid.test()
@@ -84,54 +74,6 @@ if __name__ == '__main__':
     # Calculate average ratings for movies
     avg_ratings = df_rating.groupby('movieId')['rating'].mean()
     avg_ratings_array = np.array([avg_ratings.get(mid, 0) for mid in df_movie['movieId']])
-
-    inertia = []
-    K_range = range(10, 150, 10)
-    for K in K_range:
-        kmeans = KMeans(n_clusters=K, random_state=0).fit(user_embeddings_hybrid)
-        inertia.append(kmeans.inertia_) # Plot the elbow graph
-    plt.figure(figsize=(8, 6))
-    plt.plot(K_range, inertia, 'bo-')
-    plt.xlabel('Number of clusters (K)')
-    plt.ylabel('Inertia')
-    plt.title('Elbow Method For Optimal K (user_embeddings_hybrid)')
-    plt.show()
-
-    inertia = []
-    K_range = range(10, 150, 10)
-    for K in K_range:
-        kmeans = KMeans(n_clusters=K, random_state=0).fit(movie_embeddings_hybrid)
-        inertia.append(kmeans.inertia_) # Plot the elbow graph
-    plt.figure(figsize=(8, 6))
-    plt.plot(K_range, inertia, 'bo-')
-    plt.xlabel('Number of clusters (K)')
-    plt.ylabel('Inertia')
-    plt.title('Elbow Method For Optimal K (movie_embeddings_hybrid)')
-    plt.show()
-
-    inertia = []
-    K_range = range(10, 150, 10)
-    for K in K_range:
-        kmeans = KMeans(n_clusters=K, random_state=0).fit(user_embeddings_knn)
-        inertia.append(kmeans.inertia_) # Plot the elbow graph
-    plt.figure(figsize=(8, 6))
-    plt.plot(K_range, inertia, 'bo-')
-    plt.xlabel('Number of clusters (K)')
-    plt.ylabel('Inertia')
-    plt.title('Elbow Method For Optimal K (user_embeddings_knn)')
-    plt.show()
-
-    inertia = []
-    K_range = range(10, 150, 10)
-    for K in K_range:
-        kmeans = KMeans(n_clusters=K, random_state=0).fit(movie_embeddings_knn)
-        inertia.append(kmeans.inertia_) # Plot the elbow graph
-    plt.figure(figsize=(8, 6))
-    plt.plot(K_range, inertia, 'bo-')
-    plt.xlabel('Number of clusters (K)')
-    plt.ylabel('Inertia')
-    plt.title('Elbow Method For Optimal K (movie_embeddings_knn)')
-    plt.show()
 
     # Reduce embeddings to 3D for visualization
     print("Reducing embeddings for hybrid method to 3D")
@@ -155,7 +97,7 @@ if __name__ == '__main__':
 
     random_user_indices = np.random.choice(user_embeddings_hybrid.shape[0], 100, replace=False)
     subset_user_ids = df['userId'].unique()[random_user_indices]
-    
+
     # 3D Scatter Plot for User Clusters (Hybrid Method)
     print("Plotting 3D clusters for Hybrid method (User Clusters)")
     fig = plt.figure(figsize=(10, 7))
@@ -262,4 +204,65 @@ if __name__ == '__main__':
     ax.set_title('Movie Titles in 2D PCA Space')
     ax.set_xlabel('Component 1')
     ax.set_ylabel('Component 2')
+    plt.show()
+
+    # Additional Plots
+
+    # Plotting different viewers on user feature space
+    print("Plotting different viewers on user feature space")
+    fig, ax = plt.subplots(figsize=(10, 7))
+    for user_id in test_hybrid.userid:
+        user_index = np.where(df_test['userId'].values == user_id)[0][0]
+        if user_index < len(reduced_user_data_hybrid_2d):
+            ax.scatter(reduced_user_data_hybrid_2d[user_index, 0], reduced_user_data_hybrid_2d[user_index, 1], label=f'User {user_id}')
+    ax.set_title('Different Viewers on User Feature Space')
+    ax.set_xlabel('PCA 1')
+    ax.set_ylabel('PCA 2')
+    ax.legend()
+    plt.show()
+
+    # Plotting different viewers' top 10 movies on movie feature space
+    print("Plotting different viewers' top 10 movies on movie feature space")
+    fig, ax = plt.subplots(figsize=(10, 7))
+
+    # Color map for different users
+    color_map = plt.cm.get_cmap('tab10', len(test_hybrid.userid))
+
+    for idx, user_id in enumerate(test_hybrid.userid):
+        movie_ids = test_hybrid.recommend(user_id)[:10]
+        for movie_id in movie_ids:
+            movie_index = np.where(df_movie['movieId'].values == movie_id)[0]
+            if len(movie_index) > 0 and movie_index[0] < len(reduced_movie_data_knn_2d):
+                ax.scatter(reduced_movie_data_knn_2d[movie_index[0], 0], reduced_movie_data_knn_2d[movie_index[0], 1], 
+                        color=color_map(idx), label=f'User {user_id}' if movie_id == movie_ids[0] else "")  # Label only once per user
+    ax.set_title("Different Viewers' Top 10 Movies on Movie Feature Space")
+    ax.set_xlabel('PCA 1')
+    ax.set_ylabel('PCA 2')
+    handles, labels = ax.get_legend_handles_labels()
+    unique_labels = dict(zip(labels, handles))  # Remove duplicate labels
+    ax.legend(unique_labels.values(), unique_labels.keys(), loc='best', bbox_to_anchor=(1, 1))
+    plt.show()
+
+
+    # Plotting viewer's top 10 and top 10 recommendations
+    print("Plotting viewer's top 10 and top 10 recommendations")
+    viewer_id = test_hybrid.userid[0]  # modify
+    top_10_movies = test_hybrid.recommend(viewer_id)[:10]
+    recommended_movies = test_hybrid.movie.recommend(viewer_id, top_10_movies)[:10]
+
+    fig, ax = plt.subplots(figsize=(10, 7))
+    for movie_id in top_10_movies:
+        movie_index = np.where(df_movie['movieId'].values == movie_id)[0]
+        if len(movie_index) > 0 and movie_index[0] < len(reduced_movie_data_knn_2d):
+            ax.scatter(reduced_movie_data_knn_2d[movie_index[0], 0], reduced_movie_data_knn_2d[movie_index[0], 1], marker='^', label='Viewer Top 10')
+
+    for movie_id in recommended_movies:
+        movie_index = np.where(df_movie['movieId'].values == movie_id)[0]
+        if len(movie_index) > 0 and movie_index[0] < len(reduced_movie_data_knn_2d):
+            ax.scatter(reduced_movie_data_knn_2d[movie_index[0], 0], reduced_movie_data_knn_2d[movie_index[0], 1], marker='s', label='Top 10 Recommendations')
+
+    ax.set_title("Viewer's Top 10 and Top 10 Recommendations")
+    ax.set_xlabel('PCA 1')
+    ax.set_ylabel('PCA 2')
+    ax.legend()
     plt.show()
