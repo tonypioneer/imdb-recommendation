@@ -41,3 +41,19 @@ convincingly visualise and explain their similarities.
 
 Implement a movie recommendation system and to produce additional
 visualisations using IMDB datasets, which can be found on Wattle.
+
+## Environmental Setup
+
+The experimental code is written in Python and runs in the following
+environment:
+
+- Python 3.12
+- Scikit-Learn 1.4.0
+- Surprise 0.1
+- TensorFlow 2.16.1
+
+The hardware configuration is as follows:
+
+- CPU: Apple Silicon M1 Pro
+- RAM: LPDDR5 16GB
+- GPU: Apple Silicon M1 Pro

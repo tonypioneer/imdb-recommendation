@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import re
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
@@ -10,6 +11,11 @@ from constants import DATA_PATHS
 from recommender.knn import knn_all
 import time
 from mpl_toolkits.mplot3d import Axes3D
+import warnings
+
+# Ignore deprecation warnings from Matplotlib
+warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
+
 
 class movie_recommender:
     def __init__(self):
@@ -191,17 +197,72 @@ if __name__ == '__main__':
     plt.ylabel('Component 2')
     plt.show()
 
+
+    # KNN Method
+
     # 2D Scatter Plot with Movie Titles
     print("Plotting 2D scatter plot with movie titles")
     movie_titles = df_movie['title'].unique()[:30]  # Limit to 30 movie titles
     reduced_movie_data_titles = PCA(n_components=2).fit_transform(movie_embeddings_knn[:30])  # Plot only the first 30 movies
 
+
+    def wrap_text(text, width):
+        return '\n'.join(text[i:i + width] for i in range(0, len(text), width))
+
+
+    def remove_year_from_title(title):
+        return re.sub(r' \(\d{4}\)$', '', title)
+
+
     fig, ax = plt.subplots(figsize=(12, 8))
-    scatter = ax.scatter(reduced_movie_data_titles[:, 0], reduced_movie_data_titles[:, 1], alpha=0.6, c=avg_ratings_array[:30], cmap='viridis')
+    scatter = ax.scatter(reduced_movie_data_titles[:, 0],
+                         reduced_movie_data_titles[:, 1], alpha=0.6,
+                         c=avg_ratings_array[:30], cmap='viridis')
     plt.colorbar(scatter, label='Average Rating')
+
     for i, title in enumerate(movie_titles):
-        ax.text(reduced_movie_data_titles[i, 0], reduced_movie_data_titles[i, 1], title, fontsize=9)
-    ax.set_title('Movie Titles in 2D PCA Space')
+        cleaned_title = remove_year_from_title(title)
+        wrapped_title = wrap_text(cleaned_title, 20)
+        ax.text(reduced_movie_data_titles[i, 0],
+                reduced_movie_data_titles[i, 1], wrapped_title, fontsize=6,
+                rotation=0)
+
+    ax.set_title('Movie Titles in 2D PCA Space for KNN Method')
+    ax.set_xlabel('Component 1')
+    ax.set_ylabel('Component 2')
+    plt.show()
+
+
+    # Hybrid Method
+
+    # 2D Scatter Plot with Movie Titles
+    print("Plotting 2D scatter plot with movie titles")
+    movie_titles = df_movie['title'].unique()[:30]  # Limit to 30 movie titles
+    reduced_movie_data_titles = PCA(n_components=2).fit_transform(movie_embeddings_hybrid[:30])  # Plot only the first 30 movies
+
+
+    def wrap_text(text, width):
+        return '\n'.join(text[i:i + width] for i in range(0, len(text), width))
+
+
+    def remove_year_from_title(title):
+        return re.sub(r' \(\d{4}\)$', '', title)
+
+
+    fig, ax = plt.subplots(figsize=(12, 8))
+    scatter = ax.scatter(reduced_movie_data_titles[:, 0],
+                         reduced_movie_data_titles[:, 1], alpha=0.6,
+                         c=avg_ratings_array[:30], cmap='viridis')
+    plt.colorbar(scatter, label='Average Rating')
+
+    for i, title in enumerate(movie_titles):
+        cleaned_title = remove_year_from_title(title)
+        wrapped_title = wrap_text(cleaned_title, 20)
+        ax.text(reduced_movie_data_titles[i, 0],
+                reduced_movie_data_titles[i, 1], wrapped_title, fontsize=6,
+                rotation=0)
+
+    ax.set_title('Movie Titles in 2D PCA Space for Hybrid Method')
     ax.set_xlabel('Component 1')
     ax.set_ylabel('Component 2')
     plt.show()
