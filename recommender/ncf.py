@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # Load data
-ratings = pd.read_csv('./data/input/ratings.csv')
+ratings = pd.read_csv('../data/input/ratings.csv')
 
 # Check the maximum userId and movieId in the dataset
 max_user_id = ratings['userId'].max()

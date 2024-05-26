@@ -422,7 +422,8 @@ if __name__ == '__main__':
                            reduced_movie_data_knn_2d[movie_index[0], 1],
                            marker='s', color='red')
 
-    ax.set_title("Viewer's Favourite Movies and Recommendations")
+    ax.set_title("Viewer's Favourite Movies and"
+                 " Recommendations")
     ax.set_xlabel('PCA 1')
     ax.set_ylabel('PCA 2')
     ax.legend()

@@ -1,309 +1,70 @@
-
 import pandas as pd
 import numpy as np
-import os
-import csv
-import random
-from sklearn.metrics import mean_squared_error, mean_absolute_error
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
-from sklearn.neighbors import NearestNeighbors
+from surprise import Reader, Dataset, SVD
+from surprise.model_selection import cross_validate
+from utils.load_data import df, df_test
 
-# Load data
-ratings = pd.read_csv('./data/input/ratings.csv')
-usrid = []
-movieid = []
-for i in range(len(ratings['userId'])):
-    if ratings['userId'][i] not in usrid:
-        usrid.append(ratings['userId'][i])
-    if ratings['movieId'][i] not in movieid:
-        movieid.append(ratings['movieId'][i])
+class pure_svd:
+    def __init__(self, n_factors=100, n_epochs=20, lr_all=0.005, reg_all=0.02):
+        self.index = pd.read_csv('data/input/movies.csv')
+        self.reader = Reader()
+        self.ratings = pd.read_csv('data/input/ratings.csv')
+        data = Dataset.load_from_df(self.ratings[['userId', 'movieId', 'rating']], self.reader)
+        trainset = data.build_full_trainset()
+        
+        self.algo = SVD(n_factors=n_factors, n_epochs=n_epochs, lr_all=lr_all, reg_all=reg_all)
+        
+        results = cross_validate(
+            self.algo,
+            data,
+            measures=['RMSE', 'MAE'],
+            cv=5,
+            verbose=True
+        )
+        print(results)
+        
+        self.algo.fit(trainset)
+        
+    def showSeenMovies(self, usrID):
+        print("\n\nThe user has seen movies below: ")
+        movies = []
+        for i in range(len(self.ratings['userId'])):
+            if self.ratings['userId'][i] == usrID:
+                movies.append(self.index[self.index.movieId == self.ratings['movieId'][i]]['title'])
+        for i in movies:
+            print(i.values[0])
+            
+    def showInputMovie(self, movieID):
+        print("\n\nThe user's input movie is: ")
+        print(self.index[self.index.movieId == movieID]['title'])
+        print('\n\n')
+        
+    def recommend(self, usrID, num=10):
+        self.showSeenMovies(usrID)
+        existed_movie = list(self.ratings[self.ratings.userId == usrID]['movieId'])
+        movie_scores = {}
+        
+        for movieID in self.index['movieId']:
+            if movieID not in existed_movie:
+                est = self.algo.predict(usrID, movieID).est
+                movie_scores[movieID] = est
+                
+        sorted_movies = sorted(movie_scores.items(), key=lambda x: x[1], reverse=True)
+        top_movies = sorted_movies[:num]
+        
+        recommending = []
+        for movieID, score in top_movies:
+            recommending.append(self.index[self.index.movieId == movieID]['title'])
+        
+        return recommending
 
-print(len(usrid))
-print(len(movieid))
+    def get_movie_embeddings_svd(self):
+        # Extract movie embeddings from the SVD model
+        movie_embeddings = self.algo.qi
+        return movie_embeddings
 
-train = []
-valid = []
-data_all = []
-index = 0
-for user in usrid:
-    this_user = []
-    if index >= len(ratings['userId']):
-        break
-    while ratings['userId'][index] == user:
-        temp = [ratings['userId'][index], ratings['movieId'][index], ratings['rating'][index]]
-        this_user.append(temp)
-        index += 1
-        if index >= len(ratings['userId']):
-            break
-    print(len(this_user))
-    data_all.append(this_user)
-
-threshold = 0.85
-test_data = []
-with open("./data/output/train.csv", "w") as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerow(['userId', 'movieId', 'rating'])
-    for this_user in data_all:
-        length = len(this_user)
-        for i in range(length):
-            temp = random.random()
-            if temp < threshold:
-                writer.writerow(this_user[i])
-            else:
-                test_data.append(this_user[i])
-
-with open("./data/output/test.csv", "w") as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerow(['userId', 'movieId', 'rating'])
-    for row in test_data:
-        writer.writerow(row)
-
-train_data = pd.read_csv("./data/output/train.csv")
-test_data = pd.read_csv("./data/output/test.csv")
-
-class SVD_SGD:
-    def __init__(self, n_factors, lr, reg, n_epochs):
-        self.n_factors = n_factors
-        self.lr = lr
-        self.reg = reg
-        self.n_epochs = n_epochs
-
-    def fit(self, train_data):
-        n_users = train_data['userId'].nunique()
-        n_items = train_data['movieId'].nunique()
-        self.user_factors = np.random.normal(0, 0.1, (n_users, self.n_factors))
-        self.item_factors = np.random.normal(0, 0.1, (n_items, self.n_factors))
-        self.user_map = {user: i for i, user in enumerate(train_data['userId'].unique())}
-        self.item_map = {item: i for i, item in enumerate(train_data['movieId'].unique())}
-        for epoch in range(self.n_epochs):
-            for row in train_data.itertuples():
-                user, item, rating = row.userId, row.movieId, row.rating
-                user_idx = self.user_map[user]
-                item_idx = self.item_map[item]
-                error = rating - self.predict(user_idx, item_idx)
-                self.user_factors[user_idx] += self.lr * (error * self.item_factors[item_idx] - self.reg * self.user_factors[user_idx])
-                self.item_factors[item_idx] += self.lr * (error * self.user_factors[user_idx] - self.reg * self.item_factors[item_idx])
-
-    def predict(self, user, item):
-        if user >= len(self.user_factors) or item >= len(self.item_factors):
-            return np.mean(train_data['rating'])  # Return global mean if out of bounds
-        return np.dot(self.user_factors[user], self.item_factors[item])
-
-class SVD_SGLD:
-    def __init__(self, n_factors, lr, reg, n_epochs, noise_scale):
-        self.n_factors = n_factors
-        self.lr = lr
-        self.reg = reg
-        self.n_epochs = n_epochs
-        self.noise_scale = noise_scale
-
-    def fit(self, train_data):
-        n_users = train_data['userId'].nunique()
-        n_items = train_data['movieId'].nunique()
-        self.user_factors = np.random.normal(0, 0.1, (n_users, self.n_factors))
-        self.item_factors = np.random.normal(0, 0.1, (n_items, self.n_factors))
-        self.user_map = {user: i for i, user in enumerate(train_data['userId'].unique())}
-        self.item_map = {item: i for i, item in enumerate(train_data['movieId'].unique())}
-        for epoch in range(self.n_epochs):
-            for row in train_data.itertuples():
-                user, item, rating = row.userId, row.movieId, row.rating
-                user_idx = self.user_map[user]
-                item_idx = self.item_map[item]
-                error = rating - self.predict(user_idx, item_idx)
-                noise = np.random.normal(0, self.noise_scale, self.n_factors)
-                update_user = self.lr * (error * self.item_factors[item_idx] - self.reg * self.user_factors[user_idx]) + noise
-                update_item = self.lr * (error * self.user_factors[user_idx] - self.reg * self.item_factors[item_idx]) + noise
-                self.user_factors[user_idx] += np.nan_to_num(update_user)
-                self.item_factors[item_idx] += np.nan_to_num(update_item)
-
-    def predict(self, user, item):
-        if user >= len(self.user_factors) or item >= len(self.item_factors):
-            return np.mean(train_data['rating'])  # Return global mean if out of bounds
-        return np.dot(self.user_factors[user], self.item_factors[item])
-
-class SVD_SGHMC:
-    def __init__(self, n_factors, lr, reg, n_epochs, friction, noise_scale):
-        self.n_factors = n_factors
-        self.lr = lr
-        self.reg = reg
-        self.n_epochs = n_epochs
-        self.friction = friction
-        self.noise_scale = noise_scale
-
-    def fit(self, train_data):
-        n_users = train_data['userId'].nunique()
-        n_items = train_data['movieId'].nunique()
-        self.user_factors = np.random.normal(0, 0.1, (n_users, self.n_factors))
-        self.item_factors = np.random.normal(0, 0.1, (n_items, self.n_factors))
-        self.user_map = {user: i for i, user in enumerate(train_data['userId'].unique())}
-        self.item_map = {item: i for i, item in enumerate(train_data['movieId'].unique())}
-        for epoch in range(self.n_epochs):
-            for row in train_data.itertuples():
-                user, item, rating = row.userId, row.movieId, row.rating
-                user_idx = self.user_map[user]
-                item_idx = self.item_map[item]
-                error = rating - self.predict(user_idx, item_idx)
-                noise = np.random.normal(0, self.noise_scale, self.n_factors)
-                update_user = self.lr * (error * self.item_factors[item_idx] - self.reg * self.user_factors[user_idx]) - self.friction * self.user_factors[user_idx] + noise
-                update_item = self.lr * (error * self.user_factors[user_idx] - self.reg * self.item_factors[item_idx]) - self.friction * self.item_factors[item_idx] + noise
-                self.user_factors[user_idx] += np.nan_to_num(update_user)
-                self.item_factors[item_idx] += np.nan_to_num(update_item)
-
-    def predict(self, user, item):
-        if user >= len(self.user_factors) or item >= len(self.item_factors):
-            return np.mean(train_data['rating'])  # Return global mean if out of bounds
-        return np.dot(self.user_factors[user], self.item_factors[item])
-
-def evaluate_model(model, test_data):
-    predictions = []
-    for row in test_data.itertuples():
-        user = model.user_map.get(row.userId, -1)
-        item = model.item_map.get(row.movieId, -1)
-        if user == -1 or item == -1:
-            predictions.append(np.mean(train_data['rating']))  # Fallback to global mean rating
-        else:
-            predictions.append(model.predict(user, item))
-    true_ratings = test_data['rating'].values
-    rmse = np.sqrt(mean_squared_error(true_ratings, predictions))
-    mae = mean_absolute_error(true_ratings, predictions)
-    return rmse, mae
-
-# Train and evaluate SVD with SGD
-svd_sgd = SVD_SGD(n_factors=20, lr=0.005, reg=0.05, n_epochs=200)
-svd_sgd.fit(train_data)
-rmse_sgd, mae_sgd = evaluate_model(svd_sgd, test_data)
-print(f'RMSE for SVD with SGD: {rmse_sgd}')
-print(f'MAE for SVD with SGD: {mae_sgd}')
-
-# Train and evaluate SVD with SGLD
-svd_sgld = SVD_SGLD(n_factors=20, lr=0.005, reg=0.05, n_epochs=200, noise_scale=0.01)
-svd_sgld.fit(train_data)
-rmse_sgld, mae_sgld = evaluate_model(svd_sgld, test_data)
-print(f'RMSE for SVD with SGLD: {rmse_sgld}')
-print(f'MAE for SVD with SGLD: {mae_sgld}')
-
-# Train and evaluate SVD with SGHMC
-svd_sghmc = SVD_SGHMC(n_factors=20, lr=0.005, reg=0.05, n_epochs=200, friction=0.05, noise_scale=0.01)
-svd_sghmc.fit(train_data)
-rmse_sghmc, mae_sghmc = evaluate_model(svd_sghmc, test_data)
-print(f'RMSE for SVD with SGHMC: {rmse_sghmc}')
-print(f'MAE for SVD with SGHMC: {mae_sghmc}')
-
-def visualise_clusters(model):
-    pca = PCA(n_components=2)
-    movie_factors_2d = pca.fit_transform(model.item_factors)
-    plt.scatter(movie_factors_2d[:, 0], movie_factors_2d[:, 1], alpha=0.5)
-    plt.title('Movie Clusters')
-    plt.xlabel('PCA Component 1')
-    plt.ylabel('PCA Component 2')
-    plt.show()
-
-# visualise clusters for each method
-visualise_clusters(svd_sgd)
-visualise_clusters(svd_sgld)
-visualise_clusters(svd_sghmc)
-
-class HybridRecommender:
-    def __init__(self, svd_model, k=10):
-        self.svd_model = svd_model
-        self.k = k
-
-    def fit(self, train_data):
-        self.svd_model.fit(train_data)
-        self.movie_factors = self.svd_model.item_factors
-
-    def recommend(self, user, movie_ids):
-        knn = NearestNeighbors(n_neighbors=self.k, metric='cosine')
-        knn.fit(self.movie_factors)
-        movie_indices = [self.svd_model.item_map.get(movie_id) for movie_id in movie_ids if movie_id in self.svd_model.item_map]
-        if not movie_indices:
-            return []
-        distances, knn_indices = knn.kneighbors(self.movie_factors[movie_indices], n_neighbors=self.k)
-        recommendations = []
-        for i in range(len(movie_indices)):
-            svd_scores = [self.svd_model.predict(user, list(self.svd_model.item_map.keys())[idx]) for idx in knn_indices[i]]
-            recommendations.extend(zip([list(self.svd_model.item_map.keys())[idx] for idx in knn_indices[i]], svd_scores))
-        recommendations = sorted(recommendations, key=lambda x: x[1], reverse=True)[:10]  # Take top 10 recommendations
-        return recommendations
-
-    def get_all_predictions(self, test_data):
-        predictions = []
-        for row in test_data.itertuples():
-            user = self.svd_model.user_map.get(row.userId, -1)
-            if user == -1:
-                predictions.append(np.mean(train_data['rating']))  # Fallback to global mean rating
-                continue
-            movie_ids = [row.movieId]
-            user_recommendations = self.recommend(user, movie_ids)
-            if user_recommendations:
-                predicted_rating = user_recommendations[0][1]  # Get top recommendation score
-                predictions.append(predicted_rating)
-            else:
-                predictions.append(np.mean(train_data['rating']))  # Fallback to global mean rating
-        return predictions
-
-
-# Use the HybridRecommender with the SGD optimiser to make recommendations and visualise the result
-hybrid_recommender_sgd = HybridRecommender(svd_sgd)
-hybrid_recommender_sgd.fit(train_data)
-
-# Get all predictions for the test dataset
-test_predictions = hybrid_recommender_sgd.get_all_predictions(test_data)
-
-# Calculate RMSE and MAE
-true_ratings = test_data['rating'].values
-rmse_hybrid_sgd = np.sqrt(mean_squared_error(true_ratings, test_predictions))
-mae_hybrid_sgd = mean_absolute_error(true_ratings, test_predictions)
-print(f'RMSE for Hybrid Recommender with SGD: {rmse_hybrid_sgd}')
-print(f'MAE for Hybrid Recommender with SGD: {mae_hybrid_sgd}')
-
-# Use the HybridRecommender with the SGLD optimiser to make recommendations and visualise the result
-hybrid_recommender_sgld = HybridRecommender(svd_sgld)
-hybrid_recommender_sgld.fit(train_data)
-
-# Get all predictions for the test dataset
-test_predictions = hybrid_recommender_sgld.get_all_predictions(test_data)
-
-# Calculate RMSE and MAE
-true_ratings = test_data['rating'].values
-rmse_hybrid_sgld = np.sqrt(mean_squared_error(true_ratings, test_predictions))
-mae_hybrid_sgld = mean_absolute_error(true_ratings, test_predictions)
-print(f'RMSE for Hybrid Recommender with SGLD: {rmse_hybrid_sgld}')
-print(f'MAE for Hybrid Recommender with SGLD: {mae_hybrid_sgld}')
-
-# Use the HybridRecommender with the SGHMC optimiser to make recommendations and visualise the result
-hybrid_recommender_sghmc = HybridRecommender(svd_sghmc)
-hybrid_recommender_sghmc.fit(train_data)
-
-# Get all predictions for the test dataset
-test_predictions = hybrid_recommender_sghmc.get_all_predictions(test_data)
-
-# Calculate RMSE and MAE
-true_ratings = test_data['rating'].values
-rmse_hybrid_sghmc = np.sqrt(mean_squared_error(true_ratings, test_predictions))
-mae_hybrid_sghmc = mean_absolute_error(true_ratings, test_predictions)
-print(f'RMSE for Hybrid Recommender with SGHMC: {rmse_hybrid_sghmc}')
-print(f'MAE for Hybrid Recommender with SGHMC: {mae_hybrid_sghmc}')
-
-# Example recommendation for a user (e.g., user with ID 1)
-user_id = 1
-movie_ids = test_data['movieId'].unique()[:100]  # Use a subset of movie IDs for demonstration
-recommendations = hybrid_recommender_sgd.recommend(user_id, movie_ids)
-
-print("Top 10 movie recommendations for user ID 1:")
-for movie_id, score in recommendations[:10]:
-    print(f"Movie ID: {movie_id}, Predicted Rating: {score}")
-
-# visualise the recommendations
-def visualise_recommendations(recommendations):
-    movie_ids, scores = zip(*recommendations)
-    plt.figure(figsize=(10, 6))
-    plt.bar(range(len(movie_ids)), scores, alpha=0.7)
-    plt.xticks(range(len(movie_ids)), movie_ids)
-    plt.xlabel('Movie ID')
-    plt.ylabel('Predicted Rating')
-    plt.title('Top 10 Movie Recommendations')
-    plt.show()
-
-visualise_recommendations(recommendations)
+if __name__ == '__main__':
+    test = pure_svd()
+    result = test.recommend(34, 10)
+    for i in result:
+        print(i.values[0])

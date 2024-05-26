@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # Load data
-ratings = pd.read_csv('./data/input/ratings.csv')
+ratings = pd.read_csv('../data/input/ratings.csv')
 ratings['timestamp'] = pd.to_datetime(ratings['timestamp'], unit='s')
 ratings['hour'] = ratings['timestamp'].dt.hour
 ratings['day_of_week'] = ratings['timestamp'].dt.dayofweek
