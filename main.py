@@ -6,9 +6,17 @@ from sklearn.cluster import KMeans
 from utils.load_data import df, df_test, df_movie, df_rating
 from recommender.users import user_knn
 from recommender.movies import movie_svd
+from recommender.svd import pure_svd
 from constants import DATA_PATHS
 from recommender.knn import knn_all
+import tensorflow as tf
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Embedding, Input, Flatten, Dense, Concatenate
+from tensorflow.keras.optimizers import Adam
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
 import time
+
 from mpl_toolkits.mplot3d import Axes3D
 
 class movie_recommender:
@@ -44,6 +52,26 @@ class movie_recommender:
     def get_movie_embeddings_hybrid(self):
         movie_knn_instance = knn_all()
         return movie_knn_instance.get_movie_embeddings_knn()
+
+def NCF_model(n_users, n_items, embedding_size=50):
+    user_input = Input(shape=(1,))
+    item_input = Input(shape=(1,))
+    
+    user_embedding = Embedding(n_users, embedding_size, input_length=1)(user_input)
+    item_embedding = Embedding(n_items, embedding_size, input_length=1)(item_input)
+    
+    user_vec = Flatten()(user_embedding)
+    item_vec = Flatten()(item_embedding)
+    
+    concat = Concatenate()([user_vec, item_vec])
+    
+    dense = Dense(128, activation='relu')(concat)
+    output = Dense(1)(dense)
+    
+    model = Model([user_input, item_input], output)
+    model.compile(optimizer=Adam(), loss='mean_squared_error')
+    
+    return model
 
 if __name__ == '__main__':
     max_user_id = df['userId'].max()
@@ -191,17 +219,58 @@ if __name__ == '__main__':
     plt.ylabel('Component 2')
     plt.show()
 
-    # 2D Scatter Plot with Movie Titles
-    print("Plotting 2D scatter plot with movie titles")
+    # 2D Scatter Plot with Movie Titles using SVD embeddings
+    print("Plotting 2D scatter plot with movie titles using SVD embeddings")
+    pure_svd_instance = pure_svd()
+    movie_embeddings_svd = pure_svd_instance.get_movie_embeddings_svd()
     movie_titles = df_movie['title'].unique()[:30]  # Limit to 30 movie titles
-    reduced_movie_data_titles = PCA(n_components=2).fit_transform(movie_embeddings_knn[:30])  # Plot only the first 30 movies
+    reduced_movie_data_titles_svd = PCA(n_components=2).fit_transform(movie_embeddings_svd[:30])  # Plot only the first 30 movies
 
     fig, ax = plt.subplots(figsize=(12, 8))
-    scatter = ax.scatter(reduced_movie_data_titles[:, 0], reduced_movie_data_titles[:, 1], alpha=0.6, c=avg_ratings_array[:30], cmap='viridis')
+    scatter = ax.scatter(reduced_movie_data_titles_svd[:, 0], reduced_movie_data_titles_svd[:, 1], alpha=0.6, c=avg_ratings_array[:30], cmap='viridis')
     plt.colorbar(scatter, label='Average Rating')
     for i, title in enumerate(movie_titles):
-        ax.text(reduced_movie_data_titles[i, 0], reduced_movie_data_titles[i, 1], title, fontsize=9)
-    ax.set_title('Movie Titles in 2D PCA Space')
+        ax.text(reduced_movie_data_titles_svd[i, 0], reduced_movie_data_titles_svd[i, 1], title, fontsize=9)
+    ax.set_title('Movie Titles in 2D PCA Space (SVD)')
+    ax.set_xlabel('Component 1')
+    ax.set_ylabel('Component 2')
+    plt.show()
+
+    # 2D Scatter Plot with Movie Titles using NCF embeddings
+    print("Plotting 2D scatter plot with movie titles using NCF embeddings")
+    
+    ratings = pd.read_csv('./data/input/ratings.csv')
+
+    # Check the maximum userId and movieId in the dataset
+    max_user_id = ratings['userId'].max()
+    max_movie_id = ratings['movieId'].max()
+
+    n_users = max_user_id + 1  # Ensure that the user IDs fit within the embedding layer
+    n_items = max_movie_id + 1  # Ensure that the item IDs fit within the embedding layer
+
+    # Split data into train and test sets
+    train_data, test_data = train_test_split(ratings, test_size=0.2, random_state=42)
+
+    model = NCF_model(n_users, n_items)
+    model.summary()
+
+    # Train the model
+    history = model.fit([train_data['userId'], train_data['movieId']], train_data['rating'], 
+                        epochs=5, batch_size=64, 
+                        validation_data=([test_data['userId'], test_data['movieId']], test_data['rating']))
+
+    # Extract movie embeddings from the trained NCF model
+    movie_embeddings_ncf = model.get_layer('embedding_1').get_weights()[0]
+
+    movie_titles = df_movie['title'].unique()[:30]  # Limit to 30 movie titles
+    reduced_movie_data_titles_ncf = PCA(n_components=2).fit_transform(movie_embeddings_ncf[:30])  # Plot only the first 30 movies
+
+    fig, ax = plt.subplots(figsize=(12, 8))
+    scatter = ax.scatter(reduced_movie_data_titles_ncf[:, 0], reduced_movie_data_titles_ncf[:, 1], alpha=0.6, c=avg_ratings_array[:30], cmap='viridis')
+    plt.colorbar(scatter, label='Average Rating')
+    for i, title in enumerate(movie_titles):
+        ax.text(reduced_movie_data_titles_ncf[i, 0], reduced_movie_data_titles_ncf[i, 1], title, fontsize=9)
+    ax.set_title('Movie Titles in 2D PCA Space (NCF)')
     ax.set_xlabel('Component 1')
     ax.set_ylabel('Component 2')
     plt.show()
