@@ -305,8 +305,8 @@ if __name__ == '__main__':
     plt.show()
 
 
-    # Plotting viewer's top 10 and top 10 recommendations
-    print("Plotting viewer's top 10 and top 10 recommendations")
+    # Plotting viewer's favourite movies and recommendations
+    print("Plotting viewer's favourite movies and recommendations")
     viewer_id = test_hybrid.userid[0]  # modify
     top_10_movies = test_hybrid.recommend(viewer_id)[:10]
     recommended_movies = test_hybrid.movie.recommend(viewer_id, top_10_movies)[:10]
@@ -315,15 +315,15 @@ if __name__ == '__main__':
     for movie_id in top_10_movies:
         movie_index = np.where(df_movie['movieId'].values == movie_id)[0]
         if len(movie_index) > 0 and movie_index[0] < len(reduced_movie_data_knn_2d):
-            ax.scatter(reduced_movie_data_knn_2d[movie_index[0], 0], reduced_movie_data_knn_2d[movie_index[0], 1], marker='^', label='Viewer Top 10')
+            ax.scatter(reduced_movie_data_knn_2d[movie_index[0], 0], reduced_movie_data_knn_2d[movie_index[0], 1], marker='^', label='Favourite movies')
 
     for movie_id in recommended_movies[0]:
         movie_id_index = movie_id.index[0]
         movie_index = np.where(df_movie['movieId'].values == movie_id_index)[0]
         if len(movie_index) > 0 and movie_index[0] < len(reduced_movie_data_knn_2d):
-            ax.scatter(reduced_movie_data_knn_2d[movie_index[0], 0], reduced_movie_data_knn_2d[movie_index[0], 1], marker='s', label='Top 10 Recommendations')
+            ax.scatter(reduced_movie_data_knn_2d[movie_index[0], 0], reduced_movie_data_knn_2d[movie_index[0], 1], marker='s', label='Recommended movies')
 
-    ax.set_title("Viewer's Top 10 and Top 10 Recommendations")
+    ax.set_title("Viewer's Favourite Movies and Recommendations")
     ax.set_xlabel('PCA 1')
     ax.set_ylabel('PCA 2')
     ax.legend()
